@@ -1,11 +1,15 @@
 import mongoose from "mongoose";
 
 
-
 const clientSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: 6,
     },
     username: {
         type: String,
@@ -21,11 +25,11 @@ const clientSchema = new mongoose.Schema({
     },
     company: {
         type: String,
-        required: true,
+        // required: true,
     },
     mobile: {
         type: String,
-        required: true,
+        // required: true,
     },
     projects: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +37,7 @@ const clientSchema = new mongoose.Schema({
     }],
     location: {
         type: String,
-        required: true,
+        // required: true,
     },
 });
 
