@@ -1,0 +1,42 @@
+import mongoose from "mongoose";
+import { use } from "react";
+
+
+const clientSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        minlength: 3,
+        maxlength: 20,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    company: {
+        type: String,
+        required: true,
+    },
+    mobile: {
+        type: String,
+        required: true,
+    },
+    projects: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project',
+    }],
+    location: {
+        type: String,
+        required: true,
+    },
+});
+
+const Client = mongoose.model("Client", clientSchema);
+
+export default Client;
