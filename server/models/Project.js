@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import Freelancer from "./freelancer";  
-import Client from "./client";
+
 const projectSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -31,7 +30,7 @@ const projectSchema = new mongoose.Schema({
     Freelancer:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Freelancer',
-        required: true,
+       
         unique: true, // Ensure unique freelancer for each project
     },
     applicants: [{
