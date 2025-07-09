@@ -4,8 +4,8 @@ const app = express();
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
 connectDB();
 
