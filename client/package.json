@@ -1,5 +1,5 @@
 {
-  "name": "porfolio",
+  "name": "Freelancenex",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.32.4",
     "@emailjs/browser": "^4.4.1",
     "framer-motion": "^12.12.1",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.3",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {

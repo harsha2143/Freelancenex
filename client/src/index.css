@@ -18,6 +18,18 @@ body {
   height: 100%;
  
 }
+.clip-left {
+  clip-path: polygon(0 0, 85% 0, 70% 100%, 0% 100%);
+}
+
+.clip-right {
+  clip-path: polygon(85% 0, 100% 0, 100% 100%, 70% 100%);
+}
+
+.clip-left2 {
+  clip-path: polygon(0 0, 30% 0, 15% 100%, 0% 100%);
+}
+
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

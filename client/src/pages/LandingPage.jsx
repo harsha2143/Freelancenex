@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
+import Footer from '../components/Footer';
 import { Moon, Sun, Menu, X, Star, Clock, Users, CheckCircle, ArrowRight, Mail, MapPin, Phone } from 'lucide-react';
 
 const LandingPage = () => {
-  const [showRoleOptions, setShowRoleOptions] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);   
   const [darkMode, setDarkMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
   const handleLoginClick = () => {
-    setShowRoleOptions((prev) => !prev);
+    setActiveDropdown((prev) => (prev === 'login' ? null : 'login'));
+  };
+
+  const handleSignUPClick = () => {
+    setActiveDropdown((prev) => (prev === 'signup' ? null : 'signup'));
   };
 
   const handleRoleSelect = (role) => {
     console.log("Selected role:", role);
-    setShowRoleOptions(false);
-    // Trigger your login/signup form logic here
+    setActiveDropdown(null); // Close dropdown after selection
+    // Continue with login/signup logic...
   };
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
@@ -120,103 +126,126 @@ const LandingPage = () => {
 
             {/* Login/Signup & Theme Toggle */}
             <div className="hidden md:flex items-center space-x-6">
-              <div className="hidden md:flex items-center space-x-6 relative">
-                <div className="relative">
-                  <button
-                    onClick={handleLoginClick}
-                    className={`px-4 py-2 rounded-md text-sm font-medium ${darkMode  ? 'text-white hover:text-gray-200 hover:bg-white': 'text-gray-700 hover:bg-gray-200' } transition-colors`}                  >
-                    Login
-                  </button>
-
-                  {showRoleOptions && (
-                    <div className="absolute mt-2 bg-white border border-gray-200 rounded shadow-md z-10">
-                      <button
-                        onClick={() => handleRoleSelect('client')}
-                        className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        As Client
-                      </button>
-                      <button
-                        onClick={() => handleRoleSelect('freelancer')}
-                        className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        As Freelancer
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <button className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors">
-                  Sign Up
+              <div className="relative">
+                <button
+                  onClick={handleLoginClick}
+                  className={`px-4 py-2 rounded-md text-sm font-medium ${darkMode ? 'text-white hover:text-gray-800 hover:bg-white' : 'text-gray-700 hover:bg-gray-200'} transition-colors`}
+                >
+                  Login
                 </button>
+
+                {activeDropdown === 'login' && (
+                  <div className="absolute mt-2 bg-white border border-gray-200 rounded shadow-md z-10">
+                    <button
+                      onClick={() => handleRoleSelect('client')}
+                      className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      As Client
+                    </button>
+                    <button
+                      onClick={() => handleRoleSelect('freelancer')}
+                      className="block px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      As Freelancer
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={toggleDarkMode}
-                className={`p-2 rounded-md ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-            </div>
+              <div className="relative">
+                <button
+                  onClick={handleSignUPClick}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+                >
+                  Sign Up
+                </button>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center space-x-2">
+                {activeDropdown === 'signup' && (
+                  <div className="absolute mt-2 bg-white border border-gray-200 rounded shadow-md z-10">
+                    <button
+                      onClick={() => handleRoleSelect('client')}
+                      className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      As Client
+                    </button>
+                    <button
+                      onClick={() => handleRoleSelect('freelancer')}
+                      className="block px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      As Freelancer
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
-                onClick={toggleDarkMode}
-                className={`p-2 rounded-md ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 rounded-md ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              onClick={toggleDarkMode}
+              className={`p-2 rounded-md ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             </div>
+            
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleDarkMode}
+              className={`p-2 rounded-md ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'} transition-colors`}
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`p-2 rounded-md ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className={`md:hidden ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-t`}>
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-white hover:text-green-400' : 'text-gray-900 hover:text-green-600'} transition-colors`}>
-                Home
-              </a>
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
-                About
-              </a>
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
-                Services
-              </a>
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
-                Projects
-              </a>
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
-                Testimonials
-              </a>
-              <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
-                More
-              </a>
-              <div className="pt-4 space-y-2">
-                <button className={`w-full text-left px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}>
-                  Login
-                </button>
-                <button className="w-full text-left px-3 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-colors">
-                  Sign Up
-                </button>
-                <button className={`w-full text-left px-3 py-2 rounded-md text-base font-medium border-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-100'} transition-colors`}>
-                  CONTACT
-                </button>
+        {
+          mobileMenuOpen && (
+            <div className={`md:hidden ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border-t`}>
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-white hover:text-green-400' : 'text-gray-900 hover:text-green-600'} transition-colors`}>
+                  Home
+                </a>
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
+                  About
+                </a>
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
+                  Services
+                </a>
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
+                  Projects
+                </a>
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
+                  Testimonials
+                </a>
+                <a href="#" className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}>
+                  More
+                </a>
+                <div className="pt-4 space-y-2">
+                  <button className={`w-full text-left px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}>
+                    Login
+                  </button>
+                  <button className="w-full text-left px-3 py-2 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 transition-colors">
+                    Sign Up
+                  </button>
+                  <button className={`w-full text-left px-3 py-2 rounded-md text-base font-medium border-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-100'} transition-colors`}>
+                    CONTACT
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </nav>
+          )
+        }
+      </nav >
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      < section className="relative py-20 px-4 sm:px-6 lg:px-8" >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -244,10 +273,10 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* About Section */}
-      <section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      < section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
@@ -273,10 +302,10 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      < section className="py-20 px-4 sm:px-6 lg:px-8" >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="text-green-600 font-semibold text-sm uppercase tracking-wide mb-4">
@@ -310,10 +339,10 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Projects Section */}
-      <section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      < section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="text-green-600 font-semibold text-sm uppercase tracking-wide mb-4">
@@ -346,10 +375,10 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      < section className="py-20 px-4 sm:px-6 lg:px-8" >
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="text-green-600 font-semibold text-sm uppercase tracking-wide mb-4">
@@ -385,10 +414,10 @@ const LandingPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Contact Section */}
-      <section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      < section className={`py-20 px-4 sm:px-6 lg:px-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
@@ -524,15 +553,16 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
+      <Footer/>
       {/* Footer */}
-      <footer className={`py-6 text-center ${darkMode ? 'bg-gray-900 text-gray-400' : 'bg-white text-gray-600'} border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      {/* < footer className={`py-6 text-center ${darkMode ? 'bg-gray-900 text-gray-400' : 'bg-white text-gray-600'} border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4">
           <p>&copy; {new Date().getFullYear()} FreelanceNex. All rights reserved.</p>
         </div>
-      </footer>
-    </div>
+      </footer > */}
+    </div >
   );
 };
 
