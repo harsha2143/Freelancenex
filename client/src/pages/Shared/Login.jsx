@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import axios from 'axios';
+const BACKEND_URL = import.meta.env.BACKEND_URL;
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -8,16 +10,16 @@ const LoginSignupPage = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [userType, setUserType] = useState('freelancer');
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const [loginData, setLoginData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
-  
+
   const [signupData, setSignupData] = useState({
     username: '',
     email: '',
-    password: ''
+    password: '',
   });
 
   // Social login icons as SVG components
@@ -42,63 +44,70 @@ const LoginSignupPage = () => {
     </svg>
   );
 
-  // Simulate API calls
-  const simulateAPI = (endpoint, data) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (endpoint === 'login') {
-          if (data.email === 'test@example.com' && data.password === 'password123') {
-            resolve({ success: true, message: 'Login successful!', token: 'mock-jwt-token' });
-          } else {
-            reject({ success: false, message: 'Invalid credentials' });
-          }
-        } else if (endpoint === 'signup') {
-          if (data.email === 'existing@example.com') {
-            reject({ success: false, message: 'Email already exists' });
-          } else {
-            resolve({ success: true, message: 'Account created successfully!' });
-          }
-        }
-      }, 1500);
-    });
-  };
-
   const handleSocialLogin = (provider) => {
     setMessage({ type: 'success', text: `${provider} login clicked!` });
     console.log(`${provider} login initiated`);
+    // TODO: Implement actual social login redirects (e.g., OAuth flow)
   };
 
-  const handleLogin = async () => {
-    setLoading(true);
-    setMessage({ type: '', text: '' });
+const handleLogin = async () => {
+  setLoading(true);
+  setMessage({ type: '', text: '' });
 
-    try {
-      const response = await simulateAPI('login', loginData);
-      setMessage({ type: 'success', text: response.message });
-      console.log('Login successful');
-      
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await axios.post(`${BACKEND_URL}/api/auth/login`, loginData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = response.data;
+
+    setMessage({ type: 'success', text: data.message });
+    console.log('Login successful, token:', data.token);
+    localStorage.setItem('token', data.token);
+  } catch (error) {
+    setMessage({
+      type: 'error',
+      text:
+        error.response?.data?.message ||
+        error.message ||
+        'An error occurred during login',
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSignup = async () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await simulateAPI('signup', { ...signupData, userType });
-      setMessage({ type: 'success', text: response.message });
-      
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...signupData, userType }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      setMessage({ type: 'success', text: data.message });
       setTimeout(() => {
         setIsLogin(true);
         setMessage({ type: '', text: '' });
+        setSignupData({ username: '', email: '', password: '' });
       }, 2000);
-      
+
     } catch (error) {
-      setMessage({ type: 'error', text: error.message });
+      setMessage({ type: 'error', text: error.message || 'An error occurred during registration' });
     } finally {
       setLoading(false);
     }
@@ -107,9 +116,9 @@ const LoginSignupPage = () => {
   const handleInputChange = (e, form) => {
     const { name, value } = e.target;
     if (form === 'login') {
-      setLoginData(prev => ({ ...prev, [name]: value }));
+      setLoginData((prev) => ({ ...prev, [name]: value }));
     } else {
-      setSignupData(prev => ({ ...prev, [name]: value }));
+      setSignupData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -127,16 +136,16 @@ const LoginSignupPage = () => {
 
   const SocialLoginButtons = () => (
     <div className="mb-2">
-      <div className="flex gap-8 mb-2 ">
+      <div className="flex gap-8 mb-2">
         <button
           onClick={() => handleSocialLogin('Google')}
-          className="flex-1 border border-gray-300 rounded-full py-2 px-1 flex items-center justify-center  hover:bg-gray-50 transition-colors"
+          className="flex-1 border border-gray-300 rounded-full py-2 px-1 flex items-center justify-center hover:bg-gray-50 transition-colors"
         >
           <GoogleIcon />
         </button>
         <button
           onClick={() => handleSocialLogin('Facebook')}
-          className="flex-1 border border-gray-300 rounded-full py-2 px-1 flex items-center justify-center  hover:bg-gray-50 transition-colors"
+          className="flex-1 border border-gray-300 rounded-full py-2 px-1 flex items-center justify-center hover:bg-gray-50 transition-colors"
         >
           <FacebookIcon />
         </button>
@@ -198,18 +207,19 @@ const LoginSignupPage = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-8">
       <div className="w-full max-w-5xl h-[550px] relative overflow-hidden bg-gray-900 rounded-lg border border-gray-700">
-        
         {/* LOGIN CONTAINER */}
-        <div className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
-          isLogin ? 'translate-x-0' : '-translate-x-full'
-        }`}>
+        <div
+          className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
+            isLogin ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
           <div className="flex h-full">
             {/* LOGIN FORM - LEFT SIDE */}
-            <div className="w-1/2 bg-gray-900  p-16 flex flex-col justify-center">
+            <div className="w-1/2 bg-gray-900 p-16 flex flex-col justify-center">
               <div className="w-full max-w-sm">
                 <SocialLoginButtons />
                 <UserTypeDropdown />
-                
+
                 <div className="mb-3">
                   <div className="text-white text-md font-medium">Email</div>
                   <input
@@ -221,7 +231,7 @@ const LoginSignupPage = () => {
                     className="w-full bg-transparent border-0 border-b-2 border-gray-500 text-white text-md py-2 px-0 focus:border-gray-300 focus:outline-none transition-colors"
                   />
                 </div>
-                
+
                 <div className="mb-8">
                   <div className="text-white text-md font-medium">Password</div>
                   <div className="relative">
@@ -242,18 +252,18 @@ const LoginSignupPage = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 {message.text && (
-                  <div className={`mb-6 p-3 rounded text-sm flex items-center gap-2 ${
-                    message.type === 'success' 
-                      ? 'bg-green-900/40 text-green-400' 
-                      : 'bg-red-900/40 text-red-400'
-                  }`}>
+                  <div
+                    className={`mb-6 p-3 rounded text-sm flex items-center gap-2 ${
+                      message.type === 'success' ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'
+                    }`}
+                  >
                     {message.type === 'success' ? <CheckCircle size={14} /> : <XCircle size={14} />}
                     {message.text}
                   </div>
                 )}
-                
+
                 <button
                   onClick={handleLogin}
                   disabled={loading}
@@ -268,21 +278,19 @@ const LoginSignupPage = () => {
                     'Login'
                   )}
                 </button>
-                
               </div>
             </div>
-            
+
             {/* LOGIN INFO - RIGHT SIDE */}
             <div className="w-1/2 relative">
-              {/* Diagonal background */}
               <div className="absolute inset-0 bg-gray-200"></div>
-              <div 
+              <div
                 className="absolute inset-0 bg-gray-900"
                 style={{
-                  clipPath: 'polygon(0 0, 20% 0, 0 100%)'
+                  clipPath: 'polygon(0 0, 20% 0, 0 100%)',
                 }}
               ></div>
-              
+
               <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-8">
                 <h1 className="text-6xl font-bold text-gray-900 mb-6 tracking-wider">LOGIN</h1>
                 <p className="text-gray-600 text-lg mb-8">Do Not Have An Account</p>
@@ -298,21 +306,22 @@ const LoginSignupPage = () => {
         </div>
 
         {/* SIGNUP CONTAINER */}
-        <div className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
-          isLogin ? 'translate-x-full' : 'translate-x-0'
-        }`}>
+        <div
+          className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
+            isLogin ? 'translate-x-full' : 'translate-x-0'
+          }`}
+        >
           <div className="flex h-full">
             {/* SIGNUP INFO - LEFT SIDE */}
             <div className="w-1/2 relative">
-              {/* Diagonal background */}
               <div className="absolute inset-0 bg-gray-200"></div>
-              <div 
+              <div
                 className="absolute inset-0 bg-gray-900"
                 style={{
-                  clipPath: 'polygon(80% 0, 100% 0, 100% 100%)'
+                  clipPath: 'polygon(80% 0, 100% 0, 100% 100%)',
                 }}
               ></div>
-              
+
               <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-8">
                 <h1 className="text-6xl font-bold text-gray-900 mb-6 tracking-wider">SIGNUP</h1>
                 <p className="text-gray-600 text-lg mb-8">Already Have An Account</p>
@@ -324,14 +333,14 @@ const LoginSignupPage = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* SIGNUP FORM - RIGHT SIDE */}
             <div className="w-1/2 bg-gray-900 px-16 flex flex-col justify-center">
               <div className="w-full max-w-xs">
                 <SocialLoginButtons />
-                
+
                 <UserTypeDropdown />
-                
+
                 <div className="mb-3">
                   <div className="text-white text-md font-medium">Username</div>
                   <input
@@ -342,7 +351,7 @@ const LoginSignupPage = () => {
                     className="w-full bg-transparent border-0 border-b-2 border-gray-500 text-white text-md py-2 px-0 focus:border-gray-300 focus:outline-none transition-colors"
                   />
                 </div>
-                
+
                 <div className="mb-3">
                   <div className="text-white text-md font-medium">Email</div>
                   <input
@@ -353,7 +362,7 @@ const LoginSignupPage = () => {
                     className="w-full bg-transparent border-0 border-b-2 border-gray-500 text-white text-md py-2 px-0 focus:border-gray-300 focus:outline-none transition-colors"
                   />
                 </div>
-                
+
                 <div className="mb-6">
                   <div className="text-white text-md font-medium">Password</div>
                   <div className="relative">
@@ -374,18 +383,18 @@ const LoginSignupPage = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 {message.text && (
-                  <div className={`mb-6 p-3 rounded text-sm flex items-center gap-2 ${
-                    message.type === 'success' 
-                      ? 'bg-green-900/40 text-green-400' 
-                      : 'bg-red-900/40 text-red-400'
-                  }`}>
+                  <div
+                    className={`mb-6 p-3 rounded text-sm flex items-center gap-2 ${
+                      message.type === 'success' ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'
+                    }`}
+                  >
                     {message.type === 'success' ? <CheckCircle size={14} /> : <XCircle size={14} />}
                     {message.text}
                   </div>
                 )}
-                
+
                 <button
                   onClick={handleSignup}
                   disabled={loading}

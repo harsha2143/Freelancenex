@@ -1,26 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { Moon, Sun, Menu, X, Star, Clock, Users, CheckCircle, ArrowRight, Mail, MapPin, Phone } from 'lucide-react';
 
 const LandingPage = () => {
-  const [activeDropdown, setActiveDropdown] = useState(null);   
   const [darkMode, setDarkMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const navigate=useNavigate();
 
   const handleLoginClick = () => {
-    setActiveDropdown((prev) => (prev === 'login' ? null : 'login'));
+    navigate('/login');
   };
 
-  const handleSignUPClick = () => {
-    setActiveDropdown((prev) => (prev === 'signup' ? null : 'signup'));
-  };
 
-  const handleRoleSelect = (role) => {
-    console.log("Selected role:", role);
-    setActiveDropdown(null); // Close dropdown after selection
-    // Continue with login/signup logic...
-  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -133,49 +125,15 @@ const LandingPage = () => {
                 >
                   Login
                 </button>
-
-                {activeDropdown === 'login' && (
-                  <div className="absolute mt-2 bg-white border border-gray-200 rounded shadow-md z-10">
-                    <button
-                      onClick={() => handleRoleSelect('client')}
-                      className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      As Client
-                    </button>
-                    <button
-                      onClick={() => handleRoleSelect('freelancer')}
-                      className="block px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      As Freelancer
-                    </button>
-                  </div>
-                )}
               </div>
 
               <div className="relative">
                 <button
-                  onClick={handleSignUPClick}
+                  onClick={handleLoginClick}
                   className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
                 >
                   Sign Up
                 </button>
-
-                {activeDropdown === 'signup' && (
-                  <div className="absolute mt-2 bg-white border border-gray-200 rounded shadow-md z-10">
-                    <button
-                      onClick={() => handleRoleSelect('client')}
-                      className="block w-full px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      As Client
-                    </button>
-                    <button
-                      onClick={() => handleRoleSelect('freelancer')}
-                      className="block px-6 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      As Freelancer
-                    </button>
-                  </div>
-                )}
               </div>
               <button
               onClick={toggleDarkMode}
