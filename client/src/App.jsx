@@ -26,8 +26,6 @@ const App = () => {
        <Route path='/freelancer/browse-projects' element={<BrowseProjects/>} />
       <Route path='/client/post-projects' element={<NewProject />} />
       <Route path='/client/projects' element={<ClientProjects />} />
-
-
     </Routes>
   )
 }

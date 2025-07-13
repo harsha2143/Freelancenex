@@ -8,7 +8,11 @@ import clientRoutes from './routes/clientRoutes.js';
 import freelancerRoutes from './routes/freelancerRoutes.js';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5173/'], // Allow both with and without trailing slash
+  credentials: true // if you need cookies/auth
+}));
 
 
 connectDB();
