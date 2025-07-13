@@ -1,5 +1,7 @@
 
 import Project from '../models/Project.js';
+import mongoose from 'mongoose';
+import Client from '../models/client.js';
 export const addProject = (req, res) => {
    try{
          const { title, description, budget, deadline, requiredSkills, client } = req.body;
@@ -52,5 +54,33 @@ export const deleteProject = async (req, res) => {
          res.status(200).json({ message: 'Project deleted successfully' });
     }catch (error) {
          res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
+
+export const profileData = async (req, res) => {
+    const clientId = req.params.id;
+    try {
+        const client = await Client.findById(clientId).select('-password -__v');
+        console.log(client)
+        if (!client) {
+            return res.status(404).json({ message: 'Client profile not found' });
+        }
+        res.status(200).json({ message: 'Client profile retrieved successfully', client });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
+
+export const profileUpdate = async (req, res) => {
+    const clientId = req.params.id;
+    const updatedData = req.body;
+    try {
+        const updatedClient = await Client.findByIdAndUpdate(clientId, updatedData, { new: true , runValidators: true }).select('-password -__v');
+        if (!updatedClient) {
+            return res.status(404).json({ message: 'Client profile not found' });
+        }
+        res.status(200).json({ message: 'Client profile updated successfully', client: updatedClient });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 }
