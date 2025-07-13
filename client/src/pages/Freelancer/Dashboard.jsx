@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './Sidebar';
 import { 
   Search, 
   Bell, 
@@ -15,8 +16,7 @@ import {
   Briefcase,
   Settings,
   User,
-  Menu,
-  X
+  Menu
 } from 'lucide-react';
 
 const FreelancerDashboard = () => {
@@ -105,29 +105,16 @@ const FreelancerDashboard = () => {
 
   // Simulate API calls
   useEffect(() => {
-    // Simulate fetching dashboard data
     const fetchDashboardData = async () => {
       try {
-        // Replace with actual API call
-        // const response = await fetch('/api/freelancer/dashboard');
-        // const data = await response.json();
-        // setDashboardData(data);
-        
-        // Mock API response structure
         console.log('Fetching dashboard data...');
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
     };
 
-    // Simulate fetching notifications
     const fetchNotifications = async () => {
       try {
-        // Replace with actual API call
-        // const response = await fetch('/api/freelancer/notifications');
-        // const data = await response.json();
-        // setNotifications(data);
-        
         setNotifications([
           { id: 1, message: "New project match found", unread: true },
           { id: 2, message: "Proposal accepted", unread: true }
@@ -266,106 +253,18 @@ const FreelancerDashboard = () => {
     );
   };
 
-  const Sidebar = () => (
-    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-    } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-        <div className="flex items-center">
-          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">FX</span>
-          </div>
-          <span className="ml-3 text-xl font-semibold text-gray-900">FreelanceX</span>
-        </div>
-        <button 
-          onClick={() => setSidebarOpen(false)}
-          className="lg:hidden"
-        >
-          <X className="w-6 h-6 text-gray-500" />
-        </button>
-      </div>
-      
-      <nav className="mt-6">
-        <div className="px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Freelancer Portal
-        </div>
-        <div className="mt-3 space-y-1">
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-purple-600 bg-purple-50 border-r-2 border-purple-600">
-            <Grid3X3 className="w-5 h-5 mr-3" />
-            Dashboard
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <Search className="w-5 h-5 mr-3" />
-            Browse Projects
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <Send className="w-5 h-5 mr-3" />
-            My Proposals
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <Briefcase className="w-5 h-5 mr-3" />
-            Active Projects
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <DollarSign className="w-5 h-5 mr-3" />
-            Earnings
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 relative">
-            <MessageSquare className="w-5 h-5 mr-3" />
-            Messages
-            <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              2
-            </span>
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <User className="w-5 h-5 mr-3" />
-            Profile
-          </a>
-          <a href="#" className="flex items-center px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-            <Settings className="w-5 h-5 mr-3" />
-            Settings
-          </a>
-        </div>
-      </nav>
+    return (
+    <div className="min-h-screen flex bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200">
-        <div className="flex items-center">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-700">H</span>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">harsha</p>
-            <div className="flex items-center">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="ml-1 text-sm text-gray-600">4.9 (12 reviews)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
-      
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col lg:ml-64">
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center">
-              <button 
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden mr-4"
-              >
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
                 <Menu className="w-6 h-6 text-gray-500" />
               </button>
               <div className="relative">
@@ -394,8 +293,8 @@ const FreelancerDashboard = () => {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="p-6">
+        {/* Main Body */}
+        <main className="p-6 flex-1 overflow-y-auto">
           {/* Welcome Section */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -483,14 +382,12 @@ const FreelancerDashboard = () => {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Activity & Quick Actions */}
             <div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
-                    <p className="text-gray-600">Latest updates and notifications</p>
-                  </div>
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+                  <p className="text-gray-600">Latest updates and notifications</p>
                 </div>
                 <div className="space-y-4">
                   {recentActivity.map((activity) => (
