@@ -1,6 +1,7 @@
 import Project from "../models/Project.js";
 import Freelancer from "../models/freelancer.js";
 import mongoose from "mongoose";
+import Freelancer from "../models/freelancer.js";
 
 export const getallProjects = async (req, res) => {
     try {
@@ -148,3 +149,37 @@ export const getActiveProjects = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
+export const profileData = async (req, res) => {
+    try {
+        const freelancerId = req.params.id; 
+        const freelancer = await Freelancer.findById(freelancerId).select('-password -__v'); 
+
+        if (!freelancer) {
+            return res.status(404).json({ message: 'Freelancer profile not found' });
+        }
+        console.log(freelancer);
+
+        res.status(200).json({ message: 'Freelancer profile retrieved successfully', freelancer });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
+
+export const profileUpdate = async (req, res) => {
+    try {
+        const freelancerId = req.params.id;
+        const updateData = req.body;
+
+        const updatedFreelancer = await Freelancer.findByIdAndUpdate(freelancerId, updateData, { new: true, runValidators: true });
+
+        if (!updatedFreelancer) {
+            return res.status(404).json({ message: 'Freelancer profile not found' });
+        }
+
+        res.status(200).json({ message: 'Freelancer profile updated successfully', freelancer: updatedFreelancer });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}

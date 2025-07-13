@@ -1,4 +1,6 @@
+
 import { getallProjects, freelancerProjects, getApplications, getActiveProjects } from "../controllers/freelancerController.js";
+
 import express from "express";
 const router = express.Router();
 
@@ -13,4 +15,6 @@ router.get("/test/:id", (req, res) => {
     res.json({ message: 'Test route working', id: req.params.id });
 });
 
+router.get("/profile/:id", profileData);
+router.put("/profile/:id", profileUpdate); // Assuming you want to update profile data as well
 export default router;
