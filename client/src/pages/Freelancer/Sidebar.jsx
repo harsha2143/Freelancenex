@@ -1,0 +1,110 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { 
+  Grid3X3, 
+  Search, 
+  Send, 
+  Briefcase, 
+  DollarSign, 
+  MessageSquare, 
+  User, 
+  Settings, 
+  Star ,
+  X
+} from 'lucide-react';
+
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  const navigationItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Grid3X3, path: '/freelancer/dashboard' },
+    { id: 'browse-projects', label: 'Browse Projects', icon: Search, path: '/freelancer/browse-projects' },
+    { id: 'my-proposals', label: 'My Proposals', icon: Send, path: '/freelancer/my-proposals' },
+    { id: 'active-projects', label: 'Active Projects', icon: Briefcase, path: '/freelancer/active-projects' },
+    { id: 'earnings', label: 'Earnings', icon: DollarSign, path: '/freelancer/earnings' },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/freelancer/messages' },
+    { id: 'profile', label: 'Profile', icon: User, path: '/freelancer/profile' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/freelancer/settings' },
+  ];
+
+  return (
+    <>
+    <div
+      className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg flex flex-col h-screen
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+        `}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">FX</span>
+            </div>
+            <div className="ml-3">
+              <span className="text-xl font-semibold text-gray-900">FreelanceX</span>
+              <p className="text-xs text-gray-500">Freelancer Portal</p>
+            </div>
+          </div>
+          <button
+            className="lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+      {/* Navigation */}
+      <nav className="flex-1 px-6 py-4 overflow-hidden">
+        <div className="space-y-1">
+          {navigationItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={({ isActive }) =>
+                  `w-full flex items-center px-4 py-2 text-sm font-medium rounded-r-lg transition-colors ${
+                    isActive
+                      ? 'text-purple-600 bg-purple-50'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`
+                }
+              >
+                <IconComponent className="w-5 h-5 mr-3" />
+                {item.label}
+                {item.badge && (
+                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {item.badge}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <div className="p-6 border-t border-gray-200">
+        <div className="flex items-center">
+          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+            <span className="text-sm font-medium text-gray-700">H</span>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-900">harsha</p>
+            <div className="flex items-center">
+              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <span className="ml-1 text-sm text-gray-600">4.9 (12 reviews)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </>
+  );
+};
+
+export default Sidebar;
