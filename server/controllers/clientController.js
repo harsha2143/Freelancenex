@@ -2,7 +2,7 @@
 import Project from '../models/Project.js';
 export const addProject = (req, res) => {
    try{
-         const { title, description, budget, deadline, requiredSkills, client } = req.body;
+         const { title, description, budget, deadline, requiredSkills, client ,applicants} = req.body;
     
          // Validate required fields
          if (!title || !description || !budget || !deadline || !requiredSkills || !client) {
@@ -16,7 +16,8 @@ export const addProject = (req, res) => {
               budget,
               deadline,
               requiredSkills,
-              client
+              client,
+              applicants: applicants || [], // Initialize with an empty array if no applicants are provided
          });
     
          // Save the project to the database
