@@ -1,31 +1,55 @@
 
 import Project from '../models/Project.js';
-export const addProject = (req, res) => {
+export const addProject = async (req, res) => {
    try{
-         const { title, description, budget, deadline, requiredSkills, client ,applicants} = req.body;
-    
+         const { title, description, budget, deadline, requiredSkills, client, category, isFeatured, experienceLevel, budgetType, Freelancer ,applicants} = req.body;
+
          // Validate required fields
-         if (!title || !description || !budget || !deadline || !requiredSkills || !client) {
+         if (!title || !description || !budget || !deadline || !requiredSkills || !client || !category || !experienceLevel) {
               return res.status(400).json({ message: 'All fields are required' });
+         }
+
+         // Validate budget
+         if (isNaN(budget) || budget <= 0) {
+              return res.status(400).json({ message: 'Budget must be a positive number' });
+         }
+
+         // Validate deadline
+         const deadlineDate = new Date(deadline);
+         if (isNaN(deadlineDate.getTime())) {
+              return res.status(400).json({ message: 'Invalid deadline date' });
+         }
+
+         // Validate requiredSkills array
+         if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
+              return res.status(400).json({ message: 'At least one skill is required' });
          }
     
          // Create a new project
          const newProject = new Project({
-              title,
-              description,
-              budget,
-              deadline,
+              title: title.trim(),
+              description: description.trim(),
+              budget: Number(budget),
+              deadline: deadlineDate,
               requiredSkills,
               client,
-              applicants: applicants || [], // Initialize with an empty array if no applicants are provided
+              category,
+              isFeatured: isFeatured || false,
+              experienceLevel,
+              budgetType: budgetType || 'Fixed',
+              applicants: applicants || [], 
+              Freelancer
          });
     
          // Save the project to the database
-         newProject.save()
-              .then(project => res.status(201).json({ message: 'Project created successfully', project }))
-              .catch(err => res.status(500).json({ message: 'Error creating project', error: err.message }));
-   }catch (error) {
-         res.status(500).json({ message: 'Server error', error: error.message });
+         const savedProject = await newProject.save();
+         res.status(201).json({ 
+              message: 'Project created successfully', 
+              project: savedProject 
+         });
+   } catch (error) {
+         console.error('Error creating project:', error);
+         res.status(500).json({ message: 'Error creating project', error: error.message });
     }
 }
 

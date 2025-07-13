@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Briefcase,
     Search,
@@ -13,116 +13,63 @@ import {
     Menu
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import axiosInstance from '../../api/axiosInstance';
 const ActiveProjects = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const [projects] = useState([
-        {
-            id: 1,
-            title: "E-commerce Website Development",
-            client: {
-                name: "TechCorp Inc.",
-                avatar: "/api/placeholder/40/40",
-                rating: 4.8,
-            },
-            budget: 5000,
-            progress: 65,
-            deadline: "2024-02-15",
-            status: "in_progress",
-            startedAt: "2024-01-10",
-            milestones: [
-                { id: 1, name: "Database Setup", status: "completed", amount: 1500, completedAt: "2024-01-15" },
-                { id: 2, name: "Frontend Development", status: "in_progress", amount: 2000, dueDate: "2024-02-01" },
-                { id: 3, name: "Payment Integration", status: "pending", amount: 1500, dueDate: "2024-02-10" },
-            ],
-            totalEarned: 1500,
-            pendingPayment: 0,
-            lastActivity: "2024-01-25",
-            urgency: "normal",
-        },
-        {
-            id: 2,
-            title: "Mobile App Backend API",
-            client: {
-                name: "StartupXYZ",
-                avatar: "/api/placeholder/40/40",
-                rating: 4.7,
-            },
-            budget: 3500,
-            progress: 30,
-            deadline: "2024-02-28",
-            status: "in_progress",
-            startedAt: "2024-01-20",
-            milestones: [
-                { id: 1, name: "API Design", status: "completed", amount: 1000, completedAt: "2024-01-25" },
-                { id: 2, name: "Authentication System", status: "in_progress", amount: 1500, dueDate: "2024-02-05" },
-                { id: 3, name: "Data Models", status: "pending", amount: 1000, dueDate: "2024-02-15" },
-            ],
-            totalEarned: 1000,
-            pendingPayment: 0,
-            lastActivity: "2024-01-26",
-            urgency: "normal",
-        },
-        {
-            id: 3,
-            title: "WordPress Website Redesign",
-            client: {
-                name: "Sarah Johnson",
-                avatar: "/api/placeholder/40/40",
-                rating: 4.6,
-            },
-            budget: 2000,
-            progress: 85,
-            deadline: "2024-01-30",
-            status: "review",
-            startedAt: "2024-01-08",
-            milestones: [
-                { id: 1, name: "Theme Setup", status: "completed", amount: 500, completedAt: "2024-01-12" },
-                { id: 2, name: "Content Migration", status: "completed", amount: 1000, completedAt: "2024-01-20" },
-                { id: 3, name: "Final Testing", status: "review", amount: 500, submittedAt: "2024-01-26" },
-            ],
-            totalEarned: 1500,
-            pendingPayment: 500,
-            lastActivity: "2024-01-26",
-            urgency: "high",
-        },
-        {
-            id: 4,
-            title: "Content Writing for Tech Blog",
-            client: {
-                name: "Mike Chen",
-                avatar: "/api/placeholder/40/40",
-                rating: 4.5,
-            },
-            budget: 800,
-            progress: 100,
-            deadline: "2024-01-30",
-            status: "completed",
-            startedAt: "2024-01-05",
-            milestones: [
-                { id: 1, name: "Research & Outline", status: "completed", amount: 200, completedAt: "2024-01-08" },
-                { id: 2, name: "First 5 Articles", status: "completed", amount: 300, completedAt: "2024-01-15" },
-                { id: 3, name: "Final 5 Articles", status: "completed", amount: 300, completedAt: "2024-01-25" },
-            ],
-            totalEarned: 800,
-            pendingPayment: 0,
-            lastActivity: "2024-01-25",
-            urgency: "normal",
-        },
-    ]);
+    // Get freelancer ID from localStorage or context
+    const getFreelancerId = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user?.id || user?._id || '68737c718a4b0e09448f541b'; // Fallback for testing
+    };
+
+    useEffect(() => {
+        fetchActiveProjects();
+    }, []);
+
+    const fetchActiveProjects = async () => {
+        try {
+            setLoading(true);
+            const freelancerId = getFreelancerId();
+            
+            if (!freelancerId) {
+                setError('Freelancer ID not found. Please login again.');
+                setLoading(false);
+                return;
+            }
+
+            const response = await axiosInstance.get(`/freelancer/active-projects/${freelancerId}`);
+            // console.log('Fetched projects:', response.data);
+            setProjects(response.data.projects || []);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching projects:', err);
+            if (err.response && err.response.status === 404) {
+                setError('No active projects found for this freelancer.');
+                setProjects([]);
+            } else {
+                setError('Failed to fetch projects. Please try again later.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "in_progress":
+            case "Active":
                 return "bg-blue-100 text-blue-800";
-            case "review":
+            case "Pending":
                 return "bg-yellow-100 text-yellow-800";
-            case "completed":
+            case "Completed":
                 return "bg-green-100 text-green-800";
-            case "on_hold":
-                return "bg-gray-100 text-gray-800";
+            case "cancelled":
+                return "bg-red-100 text-red-800";
             default:
                 return "bg-gray-100 text-gray-800";
         }
@@ -130,60 +77,70 @@ const ActiveProjects = () => {
 
     const getStatusText = (status) => {
         switch (status) {
-            case "in_progress":
+            case "Active":
                 return "In Progress";
-            case "review":
-                return "Under Review";
-            case "completed":
+            case "Pending":
+                return "Pending";
+            case "Completed":
                 return "Completed";
-            case "on_hold":
-                return "On Hold";
+            case "cancelled":
+                return "Cancelled";
             default:
                 return status;
         }
     };
 
-    const getUrgencyColor = (urgency) => {
-        switch (urgency) {
-            case "high":
-                return "text-red-600";
-            case "medium":
-                return "text-yellow-600";
-            case "normal":
-                return "text-green-600";
-            default:
-                return "text-gray-600";
-        }
+    const getUrgencyColor = (deadline) => {
+        if (!deadline) return "text-gray-600";
+        
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilDeadline <= 3) return "text-red-600";
+        if (daysUntilDeadline <= 7) return "text-yellow-600";
+        return "text-green-600";
     };
 
-    const getUrgencyIcon = (urgency) => {
-        switch (urgency) {
-            case "high":
-                return <AlertCircle className="h-4 w-4" />;
-            case "medium":
-                return <Clock className="h-4 w-4" />;
-            case "normal":
-                return <CheckCircle className="h-4 w-4" />;
-            default:
-                return <Clock className="h-4 w-4" />;
-        }
+    const getUrgencyIcon = (deadline) => {
+        if (!deadline) return <Clock className="h-4 w-4" />;
+        
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilDeadline <= 3) return <AlertCircle className="h-4 w-4" />;
+        if (daysUntilDeadline <= 7) return <Clock className="h-4 w-4" />;
+        return <CheckCircle className="h-4 w-4" />;
+    };
+
+    const getUrgencyText = (deadline) => {
+        if (!deadline) return "normal";
+        
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilDeadline <= 3) return "high";
+        if (daysUntilDeadline <= 7) return "medium";
+        return "normal";
     };
 
     const filteredProjects = projects.filter((project) => {
         const matchesSearch =
             project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.client.name.toLowerCase().includes(searchTerm.toLowerCase());
+            (project.client?.name && project.client.name.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesStatus = statusFilter === "all" || project.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
     const stats = {
         total: projects.length,
-        inProgress: projects.filter((p) => p.status === "in_progress").length,
-        review: projects.filter((p) => p.status === "review").length,
-        completed: projects.filter((p) => p.status === "completed").length,
-        totalEarned: projects.reduce((sum, p) => sum + p.totalEarned, 0),
-        pendingPayment: projects.reduce((sum, p) => sum + p.pendingPayment, 0),
+        inProgress: projects.filter((p) => p.status === "Active").length,
+        pending: projects.filter((p) => p.status === "Pending").length,
+        completed: projects.filter((p) => p.status === "Completed").length,
+        totalEarned: projects.reduce((sum, p) => sum + (p.earned || 0), 0),
+        pendingPayment: projects.reduce((sum, p) => sum + (p.paymentStatus === "Unpaid" ? (p.earned || 0) : 0), 0),
     };
 
     const Card = ({ children, className = "" }) => (
@@ -258,10 +215,9 @@ const ActiveProjects = () => {
                     <div className="flex items-center">
                         <Filter className="h-4 w-4 mr-2" />
                         {value === "all" ? "All Projects" :
-                            value === "in_progress" ? "In Progress" :
-                                value === "review" ? "Under Review" :
-                                    value === "completed" ? "Completed" :
-                                        value === "on_hold" ? "On Hold" : "Filter by status"}
+                            value === "Active" ? "In Progress" :
+                                value === "Pending" ? "Pending" :
+                                    value === "Completed" ? "Completed" : "Filter by status"}
                     </div>
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -272,10 +228,9 @@ const ActiveProjects = () => {
                     <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
                         {[
                             { value: "all", label: "All Projects" },
-                            { value: "in_progress", label: "In Progress" },
-                            { value: "review", label: "Under Review" },
-                            { value: "completed", label: "Completed" },
-                            { value: "on_hold", label: "On Hold" }
+                            { value: "Active", label: "In Progress" },
+                            { value: "Pending", label: "Pending" },
+                            { value: "Completed", label: "Completed" }
                         ].map((option) => (
                             <button
                                 key={option.value}
@@ -310,10 +265,43 @@ const ActiveProjects = () => {
         <div className={`w-full bg-gray-200 rounded-full ${className}`}>
             <div
                 className="bg-blue-600 h-full rounded-full transition-all duration-300"
-                style={{ width: `${value}%` }}
+                style={{ width: `${value || 0}%` }}
             />
         </div>
     );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-6 flex">
+                <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <div className="w-full mx-auto space-y-8 lg:ml-64">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Loading projects...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-6 flex">
+                <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <div className="w-full mx-auto space-y-8 lg:ml-64">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <p className="text-red-600 mb-4">{error}</p>
+                            <Button onClick={fetchActiveProjects}>Try Again</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 flex">
@@ -358,11 +346,11 @@ const ActiveProjects = () => {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <h3 className="text-sm font-medium text-gray-500">Under Review</h3>
+                            <h3 className="text-sm font-medium text-gray-500">Pending</h3>
                             <AlertCircle className="h-4 w-4 text-yellow-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-yellow-600">{stats.review}</div>
+                            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
                         </CardContent>
                     </Card>
 
@@ -436,43 +424,40 @@ const ActiveProjects = () => {
                         </Card>
                     ) : (
                         filteredProjects.map((project) => (
-                            <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                            <Card key={project._id} className="hover:shadow-lg transition-shadow">
                                 <CardContent className="pt-6">
                                     <div className="flex items-start justify-between mb-6">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <h3 className="text-xl text-black font-semibold">{project.title}</h3>
                                                 <Badge className={getStatusColor(project.status)}>{getStatusText(project.status)}</Badge>
-                                                <div className={`flex items-center gap-1 ${getUrgencyColor(project.urgency)}`}>
-                                                    {getUrgencyIcon(project.urgency)}
-                                                    <span className="text-sm capitalize">{project.urgency} Priority</span>
+                                                <div className={`flex items-center gap-1 ${getUrgencyColor(project.deadline)}`}>
+                                                    {getUrgencyIcon(project.deadline)}
+                                                    <span className="text-sm capitalize">{getUrgencyText(project.deadline)} Priority</span>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center text-black gap-3 mb-4">
                                                 <Avatar
-                                                    src={project.client.avatar}
-                                                    alt={project.client.name}
-                                                    fallback={project.client.name.charAt(0)}
+                                                    src={project.client?.avatar}
+                                                    alt={project.client?.name}
+                                                    fallback={project.client?.name?.charAt(0) || 'C'}
                                                 />
                                                 <div>
-                                                    <p className="font-medium text-black">{project.client.name}</p>
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                                        <span className="text-sm text-gray-600">{project.client.rating}</span>
-                                                    </div>
+                                                    <p className="font-medium text-black">{project.client?.name || 'Unknown Client'}</p>
+                                                    <p className="text-sm text-gray-600">{project.client?.company || project.client?.email}</p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="text-right ml-4">
-                                            <p className="text-2xl text-yellow-600 font-bold">${project.budget.toLocaleString()}</p>
+                                            <p className="text-2xl text-yellow-600 font-bold">${project.budget?.toLocaleString() || 0}</p>
                                             <p className="text-sm text-gray-500">Total Budget</p>
                                             <p className="text-lg font-semibold text-green-600 mt-1">
-                                                ${project.totalEarned.toLocaleString()} earned
+                                                ${(project.earned || 0).toLocaleString()} earned
                                             </p>
-                                            {project.pendingPayment > 0 && (
-                                                <p className="text-sm text-yellow-600">${project.pendingPayment.toLocaleString()} pending</p>
+                                            {project.paymentStatus === "Unpaid" && project.earned > 0 && (
+                                                <p className="text-sm text-yellow-600">${(project.earned || 0).toLocaleString()} pending</p>
                                             )}
                                         </div>
                                     </div>
@@ -481,80 +466,38 @@ const ActiveProjects = () => {
                                     <div className="mb-6">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-sm text-black font-medium">Overall Progress</span>
-                                            <span className="text-sm text-gray-600">{project.progress}%</span>
+                                            <span className="text-sm text-gray-600">{project.progress || 0}%</span>
                                         </div>
                                         <Progress value={project.progress} className="h-3" />
                                     </div>
 
-                                    {/* Milestones */}
-                                    <div className="mb-6">
-                                        <h4 className="font-medium text-blue-500 mb-3">Milestones</h4>
-                                        <div className="space-y-3">
-                                            {project.milestones.map((milestone) => (
-                                                <div key={milestone.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className={`w-3 h-3 rounded-full ${milestone.status === "completed"
-                                                                ? "bg-green-500"
-                                                                : milestone.status === "in_progress"
-                                                                    ? "bg-blue-500"
-                                                                    : milestone.status === "review"
-                                                                        ? "bg-yellow-500"
-                                                                        : "bg-gray-300"
-                                                                }`}
-                                                        />
-                                                        <div>
-                                                            <p className="font-medium text-black text-sm">{milestone.name}</p>
-                                                            <p className="text-xs text-gray-600">
-                                                                {milestone.status === "completed" &&
-                                                                    milestone.completedAt &&
-                                                                    `Completed ${new Date(milestone.completedAt).toLocaleDateString()}`}
-                                                                {milestone.status === "review" &&
-                                                                    milestone.submittedAt &&
-                                                                    `Submitted ${new Date(milestone.submittedAt).toLocaleDateString()}`}
-                                                                {milestone.status === "in_progress" &&
-                                                                    milestone.dueDate &&
-                                                                    `Due ${new Date(milestone.dueDate).toLocaleDateString()}`}
-                                                                {milestone.status === "pending" &&
-                                                                    milestone.dueDate &&
-                                                                    `Due ${new Date(milestone.dueDate).toLocaleDateString()}`}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-medium text-sm">${milestone.amount.toLocaleString()}</p>
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {milestone.status === "completed"
-                                                                ? "Paid"
-                                                                : milestone.status === "review"
-                                                                    ? "Review"
-                                                                    : milestone.status === "in_progress"
-                                                                        ? "Active"
-                                                                        : "Pending"}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                    
 
                                     {/* Project Meta */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-gray-800" />
-                                            <span className="text-black">Due: {new Date(project.deadline).toLocaleDateString()}</span>
+                                            <span className="text-black">
+                                                Due: {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'Not set'}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock className="h-4 w-4 text-gray-800" />
-                                            <span className="text-black">Started: {new Date(project.startedAt).toLocaleDateString()}</span>
+                                            <span className="text-black">
+                                                Started: {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'Not set'}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <MessageSquare className="h-4 w-4 text-gray-800" />
-                                            <span className="text-black">Last activity: {new Date(project.lastActivity).toLocaleDateString()}</span>
+                                            <span className="text-black">
+                                                Last updated: {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'Not set'}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <DollarSign className="h-4 w-4 text-gray-800" />
-                                            <span className="text-black">{Math.round((project.totalEarned / project.budget) * 100)}% earned</span>
+                                            <span className="text-black">
+                                                {project.budget ? Math.round(((project.earned || 0) / project.budget) * 100) : 0}% earned
+                                            </span>
                                         </div>
                                     </div>
 
@@ -570,14 +513,14 @@ const ActiveProjects = () => {
                                             </Button>
                                         </div>
 
-                                        {project.status === "in_progress" && (
+                                        {project.status === "Active" && (
                                             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                                                Mark Milestone Complete
+                                                Mark Complete
                                             </Button>
                                         )}
 
-                                        {project.status === "review" && (
-                                            <Badge className="bg-yellow-100 text-yellow-800">Waiting for client review</Badge>
+                                        {project.status === "Pending" && (
+                                            <Badge className="bg-yellow-100 text-yellow-800">Waiting to start</Badge>
                                         )}
                                     </div>
                                 </CardContent>

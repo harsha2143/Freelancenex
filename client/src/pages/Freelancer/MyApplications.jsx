@@ -1,105 +1,45 @@
-import { useState } from "react"
+import { useState ,useEffect} from "react"
 import { Send, Search, Filter, Calendar, DollarSign, Eye, MessageSquare, CheckCircle, X, Menu } from "lucide-react"
 import Sidebar from "./Sidebar"
-export default function MyProposals() {
+import axiosInstance from "../../api/axiosInstance"
+export default function MyApplications() {
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
     const [activeTab, setActiveTab] = useState("all")
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [applications, setApplications] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    const [proposals] = useState([
-        {
-            id: 1,
-            projectId: 1,
-            projectTitle: "React Native Mobile App Development",
-            client: {
-                name: "TechCorp Inc.",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.8,
-            },
-            status: "pending",
-            submittedAt: "2024-01-20",
-            proposedBudget: 4200,
-            coverLetter:
-                "I'm excited to work on your React Native mobile app project. With 5+ years of experience in mobile development...",
-            timeline: "6 weeks",
-            views: 3,
-            shortlisted: false,
-        },
-        {
-            id: 2,
-            projectId: 2,
-            projectTitle: "WordPress Website Redesign",
-            client: {
-                name: "Sarah Johnson",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.6,
-            },
-            status: "accepted",
-            submittedAt: "2024-01-18",
-            proposedBudget: 2000,
-            coverLetter:
-                "I have extensive experience with WordPress development and can deliver a modern, responsive design...",
-            timeline: "3 weeks",
-            views: 5,
-            shortlisted: true,
-            acceptedAt: "2024-01-22",
-        },
-        {
-            id: 3,
-            projectId: 3,
-            projectTitle: "Python Data Analysis Script",
-            client: {
-                name: "DataCorp Analytics",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.9,
-            },
-            status: "declined",
-            submittedAt: "2024-01-15",
-            proposedBudget: 800,
-            coverLetter: "I'm a data scientist with expertise in Python and data visualization...",
-            timeline: "2 weeks",
-            views: 2,
-            shortlisted: false,
-            declinedAt: "2024-01-19",
-            declineReason: "Client chose a different freelancer",
-        },
-        {
-            id: 4,
-            projectId: 4,
-            projectTitle: "UI/UX Design for SaaS Platform",
-            client: {
-                name: "StartupXYZ",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.7,
-            },
-            status: "pending",
-            submittedAt: "2024-01-22",
-            proposedBudget: 3000,
-            coverLetter: "I specialize in SaaS UI/UX design and have worked with similar platforms...",
-            timeline: "4 weeks",
-            views: 1,
-            shortlisted: true,
-        },
-        {
-            id: 5,
-            projectId: 5,
-            projectTitle: "Content Writing for Tech Blog",
-            client: {
-                name: "Mike Chen",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.5,
-            },
-            status: "withdrawn",
-            submittedAt: "2024-01-12",
-            proposedBudget: 600,
-            coverLetter: "I'm a technical writer with experience in emerging technologies...",
-            timeline: "2 weeks",
-            views: 4,
-            shortlisted: false,
-            withdrawnAt: "2024-01-16",
-        },
-    ])
+   const FreelancerId='68737c718a4b0e09448f541b'
+
+    useEffect(() => {
+        // Fetch proposals from API or state management
+        fetchApplications();
+    }, [])
+    const fetchApplications = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.get(`/freelancer/applications/${FreelancerId}`);
+            setApplications(response.data.applications || []);
+        } catch (error) {
+            if (error.response) {
+                // Server responded with a status other than 2xx
+                console.error('Error response:', error.response.data);
+                setError(`Failed to fetch applications: ${error.response.data.message || error.message}`);
+            } else {
+                // Network error or other
+                console.error('Error fetching applications:', error);
+                setError(`Failed to fetch applications: ${error.message}`);
+            }
+            setApplications([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+  
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -146,28 +86,80 @@ export default function MyProposals() {
         }
     }
 
-    const filteredProposals = proposals.filter((proposal) => {
+    // Ensure applications is always an array
+    const applicationsArray = Array.isArray(applications) ? applications : [];
+    console.log('Applications state:', applications);
+    console.log('ApplicationsArray length:', applicationsArray.length);
+    
+    const filteredapplications = applicationsArray.filter((proposal) => {
         const matchesSearch =
             proposal.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
             proposal.client.name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = statusFilter === "all" || proposal.status === statusFilter
         return matchesSearch && matchesStatus
     })
+    
+    console.log('Filtered applications length:', filteredapplications.length);
+    console.log('Active tab:', activeTab);
 
-    const proposalsByStatus = {
-        all: filteredProposals,
-        pending: filteredProposals.filter((p) => p.status === "pending"),
-        accepted: filteredProposals.filter((p) => p.status === "accepted"),
-        declined: filteredProposals.filter((p) => p.status === "declined"),
-        withdrawn: filteredProposals.filter((p) => p.status === "withdrawn"),
-    }
+    const applicationsByStatus = {
+        all: filteredapplications,
+        pending: filteredapplications.filter((p) => p.status === "pending"),
+        accepted: filteredapplications.filter((p) => p.status === "accepted"),
+        declined: filteredapplications.filter((p) => p.status === "declined"),
+        withdrawn: filteredapplications.filter((p) => p.status === "withdrawn"),
+    };
+
+    console.log('Applications by status:', applicationsByStatus);
+    console.log('Current tab applications:', applicationsByStatus[activeTab]);
 
     const stats = {
-        total: proposals.length,
-        pending: proposals.filter((p) => p.status === "pending").length,
-        accepted: proposals.filter((p) => p.status === "accepted").length,
-        declined: proposals.filter((p) => p.status === "declined").length,
-        successRate: Math.round((proposals.filter((p) => p.status === "accepted").length / proposals.length) * 100),
+        total: applicationsArray.length,
+        pending: applicationsArray.filter((p) => p.status === "pending").length,
+        accepted: applicationsArray.filter((p) => p.status === "accepted").length,
+        declined: applicationsArray.filter((p) => p.status === "declined").length,
+        successRate: applicationsArray.length > 0 ? Math.round((applicationsArray.filter((p) => p.status === "accepted").length / applicationsArray.length) * 100) : 0,
+    }
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8 flex">
+                <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <div className="w-full px-1 sm:px-8 lg:px-12 lg:ml-64">
+                    <div className="flex items-center justify-center min-h-screen">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                            <p className="text-gray-600">Loading applications...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8 flex">
+                <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <div className="w-full px-1 sm:px-8 lg:px-12 lg:ml-64">
+                    <div className="flex items-center justify-center min-h-screen">
+                        <div className="text-center">
+                            <div className="text-red-500 mb-4">
+                                <Send className="h-12 w-12 mx-auto" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading applications</h3>
+                            <p className="text-gray-500 mb-4">{error}</p>
+                            <button 
+                                onClick={fetchApplications}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -181,8 +173,8 @@ export default function MyProposals() {
                             <Menu className="w-6 h-6 text-gray-500" />
                         </button>
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">My Proposals</h1>
-                            <p className="text-gray-600 mt-1">Track all your submitted proposals</p>
+                            <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
+                            <p className="text-gray-600 mt-1">Track all your submitted applications</p>
                         </div>
                         <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-3 sm:ml-12 transition-all">
                             <Search className="h-4 w-4" />
@@ -195,7 +187,7 @@ export default function MyProposals() {
                         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">Total Proposals</p>
+                                    <p className="text-sm font-medium text-gray-600">Total Applications</p>
                                     <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                                 </div>
                                 <Send className="h-8 w-8 text-gray-400" />
@@ -250,7 +242,7 @@ export default function MyProposals() {
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                 <input
                                     type="text"
-                                    placeholder="Search proposals..."
+                                    placeholder="Search Applications..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -263,7 +255,7 @@ export default function MyProposals() {
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                     className="w-full sm:w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
-                                    <option value="all">All Proposals</option>
+                                    <option value="all">All Applications</option>
                                     <option value="pending">Pending</option>
                                     <option value="accepted">Accepted</option>
                                     <option value="declined">Declined</option>
@@ -273,11 +265,11 @@ export default function MyProposals() {
                         </div>
                     </div>
 
-                    {/* Proposals Tabs */}
+                    {/* Application Tabs */}
                     <div className="space-y-6">
                         <div className="bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
                             <div className="grid grid-cols-5 gap-1">
-                                {Object.entries(proposalsByStatus).map(([status, statusProposals]) => (
+                                {Object.entries(applicationsByStatus).map(([status, statusApplications]) => (
                                     <button
                                         key={status}
                                         onClick={() => setActiveTab(status)}
@@ -286,7 +278,7 @@ export default function MyProposals() {
                                             : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                                             }`}
                                     >
-                                        {getStatusText(status)} ({statusProposals.length})
+                                        {getStatusText(status)} ({statusApplications.length})
                                     </button>
                                 ))}
                             </div>
@@ -294,14 +286,14 @@ export default function MyProposals() {
 
                         {/* Tab Content */}
                         <div className="space-y-4">
-                            {proposalsByStatus[activeTab].length === 0 ? (
+                            {applicationsByStatus[activeTab].length === 0 ? (
                                 <div className="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
                                     <Send className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No proposals found</h3>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No applications found</h3>
                                     <p className="text-gray-500 mb-4">
                                         {activeTab === "all"
-                                            ? "You haven't submitted any proposals yet."
-                                            : `No proposals with ${getStatusText(activeTab)} status.`}
+                                            ? "You haven't submitted any applications yet."
+                                            : `No applications with ${getStatusText(activeTab)} status.`}
                                     </p>
                                     {activeTab === "all" && (
                                         <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
@@ -310,7 +302,7 @@ export default function MyProposals() {
                                     )}
                                 </div>
                             ) : (
-                                proposalsByStatus[activeTab].map((proposal) => (
+                                applicationsByStatus[activeTab].map((proposal) => (
                                     <div key={proposal.id} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
                                             <div className="flex-1">

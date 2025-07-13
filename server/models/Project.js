@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const projectSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -12,6 +11,14 @@ const projectSchema = new mongoose.Schema({
     budget: {
         type: Number,
         required: true,
+    },
+    budgetType: {
+        type: String,
+        default: 'Fixed', // 'Hourly' or 'Fixed'
+    },
+    isFeatured: {
+        type: Boolean,
+        default: false,
     },
     deadline: {
         type: Date,
@@ -30,18 +37,16 @@ const projectSchema = new mongoose.Schema({
     Freelancer:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Freelancer',
-       
-        unique: true, // Ensure unique freelancer for each project
     },
     applicants: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Freelancer',
-        unique: true, // Ensure unique applicants
     }],
+    default: [],
     status: {
         type: String,
-        enum: ['open', 'in-progress', 'completed', 'cancelled'],
-        default: 'open',
+        enum: ['Pending', 'Active', 'Completed', 'cancelled'],
+        default: 'Pending'
     },
     isActive:{
         type: Boolean,
@@ -50,6 +55,31 @@ const projectSchema = new mongoose.Schema({
     files:{
         type: [String], // Array of file URLs or paths
         default: [],
+    },
+    progress: {
+        type: Number,
+        default: 0, // 0 to 100
+    },
+    earned: {
+        type: Number,
+        default: 0, // Amount earned by freelancer so far
+    },
+    
+    paymentStatus: {
+        type: String,
+        enum: ['Paid', 'Unpaid'],
+        default: 'Unpaid'
+    },
+    completedAt: { type: Date },
+    category: {
+        type: String,
+        enum: ['Web Development', 'Mobile Development', 'UI/UX Design', 'Data Science', 'Content Writing', 'Digital Marketing', 'Other'],
+        required: true,
+    },
+    experienceLevel: {
+        type: String,
+        enum: ['Entry Level', 'Intermediate', 'Expert'],
+        required: true,
     },
     createdAt: {
         type: Date,
