@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const projectSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -40,13 +39,14 @@ const projectSchema = new mongoose.Schema({
     },
     Freelancer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Freelancer',
-        default: null
+        ref: 'Freelancer'
+
     },
     applicants: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Freelancer',
     }],
+    default: [],
     status: {
         type: String,
         enum: ['Pending', 'Active', 'Completed', 'cancelled'],
@@ -68,6 +68,7 @@ const projectSchema = new mongoose.Schema({
         type: Number,
         default: 0, // Amount earned by freelancer so far
     },
+
     paymentStatus: {
         type: String,
         enum: ['Paid', 'Unpaid'],
