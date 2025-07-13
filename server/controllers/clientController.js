@@ -1,57 +1,6 @@
 import Project from '../models/Project.js';
 import mongoose from 'mongoose';
 
-import { v2 as cloudinary } from 'cloudinary';
-import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
-    api_key: process.env.CLOUDINARY_API_KEY || 'demo',
-    api_secret: process.env.CLOUDINARY_API_SECRET || 'demo',
-});
-
-// Configure Multer with Cloudinary storage
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'freelancex_projects', // Folder in Cloudinary
-        allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'zip'],
-        resource_type: 'auto', // Automatically detect file type
-    },
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit per file
-}).array('files', 5); // Allow up to 5 files
-
-// Upload files to local storage
-export const uploadFiles = async (req, res) => {
-    try {
-        upload(req, res, async (err) => {
-            if (err) {
-                console.error('Upload error:', err);
-                return res.status(400).json({ message: 'File upload failed', error: err.message });
-            }
-
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json({ message: 'No files uploaded' });
-            }
-
-            // Extract file paths for local storage
-            const fileUrls = req.files.map(file => `/uploads/${file.filename}`);
-            console.log('Files uploaded locally:', fileUrls);
-
-            res.status(200).json({ message: 'Files uploaded successfully', fileUrls });
-        });
-    } catch (error) {
-        console.error('Error in uploadFiles:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
 
 export const addProject = async (req, res) => {
     try {
@@ -154,47 +103,6 @@ export const getAllClients = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 }
-
-// Helper function to create a test client
-export const createTestClient = async (req, res) => {
-    try {
-        const Client = mongoose.model('Client');
-        const bcrypt = await import('bcryptjs');
-        
-        // Check if test client already exists
-        const existingClient = await Client.findOne({ email: 'test@client.com' });
-        if (existingClient) {
-            return res.status(200).json({ 
-                message: 'Test client already exists', 
-                clientId: existingClient._id 
-            });
-        }
-
-        // Create test client
-        const salt = await bcrypt.default.genSalt(10);
-        const hashedPassword = await bcrypt.default.hash('password123', salt);
-
-        const testClient = new Client({
-            name: 'Test Client',
-            username: 'testclient',
-            email: 'test@client.com',
-            password: hashedPassword,
-            company: 'Test Company',
-            mobile: '1234567890',
-            location: 'Test City'
-        });
-
-        await testClient.save();
-        res.status(201).json({ 
-            message: 'Test client created successfully', 
-            clientId: testClient._id 
-        });
-    } catch (error) {
-        console.error('Error creating test client:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-}
-
 
 
 router.get('/client/proposals', async (req, res) => {
