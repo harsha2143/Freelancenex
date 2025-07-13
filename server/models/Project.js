@@ -26,17 +26,21 @@ const projectSchema = new mongoose.Schema({
     },
     requiredSkills: [{
         type: String,
-        enum:['JavaScript','UI/UX','Python', 'Java', 'C++', 'Ruby', 'PHP', 'HTML/CSS', 'React', 'Node.js', 'Django', 'Flask', 'Angular', 'Vue.js'],
+        enum: ['JavaScript', 'UI/UX', 'Python', 'Java', 'C++', 'Ruby', 'PHP', 'HTML/CSS', 'React', 'Node.js', 'Django', 'Flask', 'Angular', 'Vue.js', 'other'],
         required: true,
+    }],
+    customSkills: [{
+        type: String,
     }],
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Client',
         required: true,
     },
-    Freelancer:{
+    Freelancer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Freelancer',
+        ref: 'Freelancer'
+
     },
     applicants: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -48,11 +52,11 @@ const projectSchema = new mongoose.Schema({
         enum: ['Pending', 'Active', 'Completed', 'cancelled'],
         default: 'Pending'
     },
-    isActive:{
+    isActive: {
         type: Boolean,
         default: true,
     },
-    files:{
+    files: {
         type: [String], // Array of file URLs or paths
         default: [],
     },
@@ -64,7 +68,7 @@ const projectSchema = new mongoose.Schema({
         type: Number,
         default: 0, // Amount earned by freelancer so far
     },
-    
+
     paymentStatus: {
         type: String,
         enum: ['Paid', 'Unpaid'],
@@ -93,4 +97,3 @@ const projectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', projectSchema);
 export default Project;
-
