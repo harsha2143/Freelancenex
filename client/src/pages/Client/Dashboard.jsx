@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Bell, 
-  Plus, 
-  FolderOpen, 
-  CreditCard, 
-  Eye, 
-  Settings, 
-  User, 
+import Sidebar from './Sidebar';
+import {
+  Bell,
+  Plus,
+  FolderOpen,
+  CreditCard,
+  Eye,
+  Settings,
+  User,
   LogOut,
   CheckCircle,
   Clock,
@@ -18,13 +19,11 @@ import {
   Search,
   Send,
   Briefcase,
-  BarChart3,
-  Grid3X3,
-  Star
+  Menu
 } from 'lucide-react';
 
 const ClientDashboard = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     stats: {
       activeProjects: 0,
@@ -56,7 +55,7 @@ const ClientDashboard = () => {
       const data = await response.json();
       setDashboardData(data);
       */
-      
+
       // Demo data
       setTimeout(() => {
         setDashboardData({
@@ -158,19 +157,8 @@ const ClientDashboard = () => {
     }
   };
 
-  const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Grid3X3 },
-    { id: 'browse-projects', label: 'Browse Projects', icon: Search },
-    { id: 'my-proposals', label: 'My Proposals', icon: Send },
-    { id: 'active-projects', label: 'Active Projects', icon: Briefcase },
-    { id: 'earnings', label: 'Earnings', icon: DollarSign },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2 },
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
 
-  const handleNavigation = (tabId) => {
-    setActiveTab(tabId);
+  const handleNavigation = () => {
     // Handle actual navigation here
     /*
     switch(tabId) {
@@ -223,10 +211,10 @@ const ClientDashboard = () => {
       console.error('Error marking notification as read:', error);
     }
     */
-    
+
     setDashboardData(prev => ({
       ...prev,
-      notifications: prev.notifications.map(notif => 
+      notifications: prev.notifications.map(notif =>
         notif.id === notificationId ? { ...notif, unread: false } : notif
       )
     }));
@@ -241,117 +229,66 @@ const ClientDashboard = () => {
     }
   };
 
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case 'proposal': return User;
-      case 'milestone': return CheckCircle;
-      case 'payment': return DollarSign;
-      case 'message': return MessageSquare;
-      default: return Bell;
-    }
-  };
+  // const getActivityIcon = (type) => {
+  //   switch (type) {
+  //     case 'proposal': return User;
+  //     case 'milestone': return CheckCircle;
+  //     case 'payment': return DollarSign;
+  //     case 'message': return MessageSquare;
+  //     default: return Bell;
+  //   }
+  // };
 
-  const getActivityColor = (type) => {
-    switch (type) {
-      case 'proposal': return 'bg-blue-100 text-blue-600';
-      case 'milestone': return 'bg-green-100 text-green-600';
-      case 'payment': return 'bg-purple-100 text-purple-600';
-      case 'message': return 'bg-orange-100 text-orange-600';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
+  // const getActivityColor = (type) => {
+  //   switch (type) {
+  //     case 'proposal': return 'bg-blue-100 text-blue-600';
+  //     case 'milestone': return 'bg-green-100 text-green-600';
+  //     case 'payment': return 'bg-purple-100 text-purple-600';
+  //     case 'message': return 'bg-orange-100 text-orange-600';
+  //     default: return 'bg-gray-100 text-gray-600';
+  //   }
+  // };
 
   const unreadCount = dashboardData.notifications.filter(n => n.unread).length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg fixed left-0 top-0 h-full overflow-y-auto">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">FX</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">FreelanceX</span>
-          </div>
-          <p className="text-sm text-gray-500 mt-2">Client Portal</p>
-        </div>
-
-        {/* Navigation */}
-        <nav className="p-4">
-          <ul className="space-y-2">
-            {navigationItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => handleNavigation(item.id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === item.id
-                        ? 'bg-purple-100 text-purple-700 border-r-2 border-purple-500'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <IconComponent className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                    {item.badge && (
-                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User Profile */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 font-medium">H</span>
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">harsha</p>
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                <span className="text-sm text-gray-600">4.9 (12 reviews)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       {/* Main Content */}
-      <div className="flex-1 ml-64">
+      <main className="flex-1 flex flex-col lg:ml-64">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-600">Welcome back, Saripalli Harshavardhan</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                    <Bell className="w-6 h-6" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {unreadCount}
-                      </span>
-                    )}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="flex items-center jusify-start  lg:justify-between">
+            <div className="flex">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
+                <Menu className="w-6 h-6 text-gray-500" />
+              </button>
+              <div className="flex items-center justify-between px-6 py-4">
+                {/* Left Side - Heading and Subtitle */}
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-gray-600">Welcome back, Saripalli Harshavardhan</p>
+                </div>
+                {/* Right Side - Bell and Button */}
+                <div className="flex items-center space-x-6">
+                  <div className="relative">
+                    <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                      <Bell className="w-6 h-6" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handlePostNewProject}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Post Project</span>
                   </button>
                 </div>
-                <button 
-                  onClick={handlePostNewProject}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Post Project</span>
-                </button>
               </div>
             </div>
           </div>
@@ -372,7 +309,7 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -384,7 +321,7 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -396,7 +333,7 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -417,7 +354,7 @@ const ClientDashboard = () => {
                 <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
-                    <button 
+                    <button
                       onClick={() => handleNavigation('active-projects')}
                       className="text-purple-600 hover:text-purple-800 text-sm font-medium"
                     >
@@ -499,8 +436,8 @@ const ClientDashboard = () => {
                 <div className="p-6">
                   <div className="space-y-4">
                     {dashboardData.notifications.map((notification) => (
-                      <div 
-                        key={notification.id} 
+                      <div
+                        key={notification.id}
                         className={`p-3 rounded-lg border ${notification.unread ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
                       >
                         <div className="flex items-start justify-between">
@@ -510,7 +447,7 @@ const ClientDashboard = () => {
                             <p className="text-xs text-gray-500 mt-2">{notification.time}</p>
                           </div>
                           {notification.unread && (
-                            <button 
+                            <button
                               onClick={() => markNotificationAsRead(notification.id)}
                               className="ml-2 w-2 h-2 bg-blue-500 rounded-full"
                             />
@@ -533,7 +470,7 @@ const ClientDashboard = () => {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button 
+                  <button
                     onClick={handlePostNewProject}
                     className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
@@ -543,8 +480,8 @@ const ClientDashboard = () => {
                       <p className="text-sm text-gray-500">Start hiring for your next project</p>
                     </div>
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={() => handleNavigation('active-projects')}
                     className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
@@ -554,8 +491,8 @@ const ClientDashboard = () => {
                       <p className="text-sm text-gray-500">View and update your projects</p>
                     </div>
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={() => handleNavigation('earnings')}
                     className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
@@ -570,8 +507,9 @@ const ClientDashboard = () => {
             </div>
           </div>
         </main>
-      </div>
+      </main>
     </div>
+
   );
 };
 
