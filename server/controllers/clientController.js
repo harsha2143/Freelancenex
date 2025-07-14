@@ -1,5 +1,6 @@
 import Project from '../models/Project.js';
 
+
 import mongoose from 'mongoose';
 import Client from '../models/client.js';
 export const addProject = async (req, res) => {
@@ -67,6 +68,7 @@ export const addProject = async (req, res) => {
 export const getProjectsByClientID = async (req, res) => {
     const clientId = req.params.id;
     try{
+     
      
          const projects = await Project.find({ client: clientId });
          if (!projects || projects.length === 0) {

@@ -1,25 +1,33 @@
-import { useState } from "react"
-import { Upload, X, DollarSign, Calendar, FileText, Tag, Menu } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import { Upload, X, DollarSign, Calendar, FileText, Tag, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
+
 export default function NewProject() {
-    const [isLoading, setIsLoading] = useState(false)
-    const [skills, setSkills] = useState([])
-    const [skillInput, setSkillInput] = useState("")
+    const [isLoading, setIsLoading] = useState(false);
+    const [skills, setSkills] = useState([]);
+    const [skillInput, setSkillInput] = useState("");
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [customSkill, setCustomSkill] = useState("");
+    const fileInputRef = useRef(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        if (skillInput === "other" && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [skillInput]);
 
     const [projectData, setProjectData] = useState({
         title: "",
         description: "",
         category: "",
         budgetType: "fixed",
-        budgetAmount: "",
-        budgetMin: "",
-        budgetMax: "",
+        budget: "",
         deadline: "",
         experienceLevel: "",
-        projectLength: "",
-        attachments: [],
-    })
+        attachments: [], // Store selected files
+    });
 
     const categories = [
         "Web Development",
@@ -32,34 +40,138 @@ export default function NewProject() {
         "Graphic Design",
         "Video Editing",
         "Translation",
-    ]
+    ];
 
-    const addSkill = () => {
-        if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-            setSkills([...skills, skillInput.trim()])
-            setSkillInput("")
-        }
-    }
+    const predefinedSkills = [
+        "JavaScript",
+        "UI/UX",
+        "Python",
+        "Java",
+        "C++",
+        "Ruby",
+        "PHP",
+        "HTML/CSS",
+        "React",
+        "Node.js",
+        "Django",
+        "Flask",
+        "Angular",
+        "Vue.js",
+        "other"
+    ];
 
     const removeSkill = (skillToRemove) => {
-        setSkills(skills.filter((skill) => skill !== skillToRemove))
-    }
+        setSkills(skills.filter((skill) => skill !== skillToRemove));
+    };
+
+    const removeFile = (indexToRemove) => {
+        setProjectData({
+            ...projectData,
+            attachments: projectData.attachments.filter((_, index) => index !== indexToRemove),
+        });
+    };
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        const validFormats = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'application/zip'];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+
+        const validFiles = files.filter(file => {
+            if (!validFormats.includes(file.type)) {
+                alert(`File ${file.name} has an unsupported format. Supported formats: PDF, DOC, DOCX, JPG, PNG, ZIP`);
+                return false;
+            }
+            if (file.size > maxSize) {
+                alert(`File ${file.name} exceeds the 10MB size limit.`);
+                return false;
+            }
+            return true;
+        });
+
+        setProjectData({
+            ...projectData,
+            attachments: [...projectData.attachments, ...validFiles],
+        });
+    };
+
+    const mapExperience = (level) => {
+        switch (level) {
+            case "entry": return "Entry Level";
+            case "intermediate": return "Intermediate";
+            case "expert": return "Expert";
+            default: return "";
+        }
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setIsLoading(true)
+        e.preventDefault();
+        setIsLoading(true);
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000))
+            // Separate predefined and custom skills
+            const requiredSkills = skills.filter(skill => predefinedSkills.includes(skill));
+            const customSkills = skills.filter(skill => !predefinedSkills.includes(skill));
 
-            alert("Project posted successfully! Your project is now live and freelancers can start submitting proposals.")
-        } catch (error) {
-            alert("Error: Failed to post project. Please try again.", error)
+            // Upload files to Cloudinary
+            let fileUrls = [];
+            if (projectData.attachments.length > 0) {
+                const formData = new FormData();
+                projectData.attachments.forEach(file => formData.append('files', file));
+
+                const uploadResponse = await axios.post(
+                    `${import.meta.env.VITE_BACKEND_URL}/client/upload`,
+                    formData,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                );
+
+                fileUrls = uploadResponse.data.fileUrls;
+            }
+
+            const payload = {
+                title: projectData.title,
+                description: projectData.description,
+                budget: Number(projectData.budget),
+                deadline: projectData.deadline,
+                requiredSkills,
+                customSkills,
+                client: "68738184c60db42071ca5a30", // Replace with dynamic client ID later
+                category: projectData.category.replace(/_/g, " "),
+                experienceLevel: mapExperience(projectData.experienceLevel),
+                files: fileUrls, // Include Cloudinary URLs
+            };
+
+            const res = await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL}/client/addProject`,
+                payload
+            );
+
+            alert("✅ Project posted successfully!");
+            console.log(res.data);
+
+            // Reset form
+            setProjectData({
+                title: "",
+                description: "",
+                category: "",
+                budgetType: "fixed",
+                budget: "",
+                deadline: "",
+                experienceLevel: "",
+                attachments: [],
+            });
+            setSkills([]);
+            setSkillInput("");
+            setCustomSkill("");
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ""; // Clear file input
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            alert("❌ Failed to post project: " + (err.response?.data?.message || err.message));
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 flex">
@@ -68,14 +180,11 @@ export default function NewProject() {
                 <div className="space-y-8">
                     {/* Header */}
                     <div className="flex items-center flex-wrap sm:flex-nowrap">
-                        {/* Button */}
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-6">
                             <Menu className="w-6 h-6 text-gray-500" />
                         </button>
-
-                        {/* Heading and subtext */}
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Post a New Project</h1>
+                            <h1 className="text-3xl font-bold text-black text-gray-900">Post a New Project</h1>
                             <p className="text-gray-600 mt-1">Tell us about your project and find the perfect freelancer</p>
                         </div>
                     </div>
@@ -90,7 +199,7 @@ export default function NewProject() {
                                 </h3>
                                 <p className="text-sm text-gray-600 mt-1">Provide a clear and detailed description of your project</p>
                             </div>
-                            <div className="px-6 py-6 space-y-6">
+                            <div className="px-6 py-6 space-y-6 text-black">
                                 <div className="space-y-2">
                                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                                         Project Title *
@@ -106,7 +215,7 @@ export default function NewProject() {
                                     />
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-black">
                                     <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                                         Category *
                                     </label>
@@ -119,14 +228,14 @@ export default function NewProject() {
                                     >
                                         <option value="">Select project category</option>
                                         {categories.map((category) => (
-                                            <option key={category} value={category.toLowerCase().replace(/\s+/g, "_")}>
+                                            <option key={category} value={category.replace(/\s+/g, "_")}>
                                                 {category}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-black">
                                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                                         Project Description *
                                     </label>
@@ -141,26 +250,71 @@ export default function NewProject() {
                                     />
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-black">
                                     <label className="block text-sm font-medium text-gray-700">Required Skills</label>
                                     <div className="flex gap-2">
-                                        <input
-                                            type="text"
+                                        <select
                                             value={skillInput}
-                                            onChange={(e) => setSkillInput(e.target.value)}
-                                            placeholder="Add a required skill"
-                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={addSkill}
-                                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center gap-1"
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === "other") {
+                                                    setSkillInput("other");
+                                                    setCustomSkill("");
+                                                } else if (value !== "") {
+                                                    if (!skills.includes(value)) {
+                                                        setSkills([...skills, value]);
+                                                    }
+                                                    setSkillInput("");
+                                                }
+                                            }}
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <Tag className="h-4 w-4" />
-                                            Add
-                                        </button>
+                                            <option value="">Select a skill</option>
+                                            {predefinedSkills.map((skill) => (
+                                                <option key={skill} value={skill}>
+                                                    {skill === "other" ? "Other (Type your own)" : skill}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
+
+                                    {skillInput === "other" && (
+                                        <div className="flex gap-2 mt-2">
+                                            <input
+                                                ref={inputRef}
+                                                type="text"
+                                                value={customSkill}
+                                                onChange={(e) => setCustomSkill(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" && customSkill.trim()) {
+                                                        e.preventDefault();
+                                                        if (!skills.includes(customSkill.trim())) {
+                                                            setSkills([...skills, customSkill.trim()]);
+                                                        }
+                                                        setCustomSkill("");
+                                                        setSkillInput("");
+                                                    }
+                                                }}
+                                                placeholder="Enter custom skill"
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (customSkill.trim() && !skills.includes(customSkill.trim())) {
+                                                        setSkills([...skills, customSkill.trim()]);
+                                                        setCustomSkill("");
+                                                        setSkillInput("");
+                                                    }
+                                                }}
+                                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center gap-1"
+                                            >
+                                                <Tag className="h-4 w-4" />
+                                                Add
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {skills.map((skill, index) => (
                                             <span
@@ -184,90 +338,27 @@ export default function NewProject() {
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <DollarSign className="h-5 w-5 text-green-600" />
-                                    Budget & Timeline
+                                    Budget
                                 </h3>
-                                <p className="text-sm text-gray-600 mt-1">Set your budget and project timeline</p>
+                                <p className="text-sm text-gray-600 mt-1">Set your budget</p>
                             </div>
                             <div className="px-6 py-6 space-y-6">
-                                <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-gray-700">Budget Type *</label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div
-                                            className={`cursor-pointer rounded-lg border-2 transition-all ${projectData.budgetType === "fixed"
-                                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500 ring-opacity-20"
-                                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                                }`}
-                                            onClick={() => setProjectData({ ...projectData, budgetType: "fixed" })}
-                                        >
-                                            <div className="p-4 text-center">
-                                                <h4 className="font-medium text-gray-900">Fixed Price</h4>
-                                                <p className="text-sm text-gray-600 mt-1">Pay a set amount for the entire project</p>
-                                            </div>
-                                        </div>
-                                        <div
-                                            className={`cursor-pointer rounded-lg border-2 transition-all ${projectData.budgetType === "hourly"
-                                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500 ring-opacity-20"
-                                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                                }`}
-                                            onClick={() => setProjectData({ ...projectData, budgetType: "hourly" })}
-                                        >
-                                            <div className="p-4 text-center">
-                                                <h4 className="font-medium text-gray-900">Hourly Rate</h4>
-                                                <p className="text-sm text-gray-600 mt-1">Pay based on hours worked</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div className="space-y-2 text-black">
+                                    <label htmlFor="budgetAmount" className="block text-sm font-medium text-gray-700">
+                                        Project Budget (USD) *
+                                    </label>
+                                    <input
+                                        id="budget"
+                                        type="number"
+                                        value={projectData.budget}
+                                        onChange={(e) => setProjectData({ ...projectData, budget: e.target.value })}
+                                        placeholder="5000"
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        required
+                                    />
                                 </div>
 
-                                {projectData.budgetType === "fixed" ? (
-                                    <div className="space-y-2">
-                                        <label htmlFor="budgetAmount" className="block text-sm font-medium text-gray-700">
-                                            Project Budget (USD) *
-                                        </label>
-                                        <input
-                                            id="budgetAmount"
-                                            type="number"
-                                            value={projectData.budgetAmount}
-                                            onChange={(e) => setProjectData({ ...projectData, budgetAmount: e.target.value })}
-                                            placeholder="5000"
-                                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            required
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label htmlFor="budgetMin" className="block text-sm font-medium text-gray-700">
-                                                Min Hourly Rate (USD) *
-                                            </label>
-                                            <input
-                                                id="budgetMin"
-                                                type="number"
-                                                value={projectData.budgetMin}
-                                                onChange={(e) => setProjectData({ ...projectData, budgetMin: e.target.value })}
-                                                placeholder="25"
-                                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label htmlFor="budgetMax" className="block text-sm font-medium text-gray-700">
-                                                Max Hourly Rate (USD) *
-                                            </label>
-                                            <input
-                                                id="budgetMax"
-                                                type="number"
-                                                value={projectData.budgetMax}
-                                                onChange={(e) => setProjectData({ ...projectData, budgetMax: e.target.value })}
-                                                placeholder="50"
-                                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-black">
                                     <label htmlFor="deadline" className="block text-sm font-medium text-gray-700">
                                         Project Deadline *
                                     </label>
@@ -280,29 +371,11 @@ export default function NewProject() {
                                         required
                                     />
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label htmlFor="projectLength" className="block text-sm font-medium text-gray-700">
-                                        Expected Project Length
-                                    </label>
-                                    <select
-                                        id="projectLength"
-                                        value={projectData.projectLength}
-                                        onChange={(e) => setProjectData({ ...projectData, projectLength: e.target.value })}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        <option value="">Select project duration</option>
-                                        <option value="less_than_1_month">Less than 1 month</option>
-                                        <option value="1_to_3_months">1 to 3 months</option>
-                                        <option value="3_to_6_months">3 to 6 months</option>
-                                        <option value="more_than_6_months">More than 6 months</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
 
                         {/* Requirements */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-black">
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <Calendar className="h-5 w-5 text-purple-600" />
@@ -345,16 +418,43 @@ export default function NewProject() {
                                     <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                                     <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Files</h4>
                                     <p className="text-gray-600 mb-4">Drag and drop files here, or click to browse</p>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        multiple
+                                        accept=".pdf,.doc,.docx,.jpg,.png,.zip"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        id="file-upload"
+                                    />
                                     <button
                                         type="button"
+                                        onClick={() => fileInputRef.current.click()}
                                         className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     >
                                         Choose Files
                                     </button>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        Supported formats: PDF, DOC, DOCX, JPG, PNG, ZIP (Max 10MB each)
+                                        Supported formats: PDF, DOC, DOCX, JPG, PNG, ZIP (Max 10MB each, up to 5 files)
                                     </p>
                                 </div>
+                                {/* Display selected files */}
+                                {projectData.attachments.length > 0 && (
+                                    <div className="mt-4">
+                                        <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                                        <ul className="mt-2 space-y-2">
+                                            {projectData.attachments.map((file, index) => (
+                                                <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                                                    <span>{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                                                    <X
+                                                        className="h-4 w-4 cursor-pointer hover:text-red-500"
+                                                        onClick={() => removeFile(index)}
+                                                    />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -388,5 +488,5 @@ export default function NewProject() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
