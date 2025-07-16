@@ -17,7 +17,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Grid3X3, path: '/freelancer/dashboard' },
     { id: 'browse-projects', label: 'Browse Projects', icon: Search, path: '/freelancer/browse-projects' },
-    { id: 'my-proposals', label: 'My Proposals', icon: Send, path: '/freelancer/my-proposals' },
+    { id: 'my-proposals', label: 'My Applications', icon: Send, path: '/freelancer/my-applications' },
     { id: 'active-projects', label: 'Active Projects', icon: Briefcase, path: '/freelancer/active-projects' },
     { id: 'earnings', label: 'Earnings', icon: DollarSign, path: '/freelancer/earnings' },
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/freelancer/messages' },

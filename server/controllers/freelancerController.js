@@ -1,7 +1,6 @@
 import Project from "../models/Project.js";
 import Freelancer from "../models/freelancer.js";
 import mongoose from "mongoose";
-import Freelancer from "../models/freelancer.js";
 
 export const getallProjects = async (req, res) => {
     try {

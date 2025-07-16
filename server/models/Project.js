@@ -43,9 +43,18 @@ const projectSchema = new mongoose.Schema({
 
     },
     applicants: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Freelancer',
+        freelancerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Freelancer',
+            required: true
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted', 'declined'],
+            default: 'pending'
+        }
     }],
+
     default: [],
     status: {
         type: String,
