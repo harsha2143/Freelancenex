@@ -187,7 +187,7 @@ const ClientDashboard = () => {
 
   const handlePostNewProject = async () => {
     try {
-      const clientId = getClientId();
+      const clientId = user.id;
       if (!clientId) {
         alert('Client ID not found. Please log in again.');
         return;
@@ -303,7 +303,7 @@ const ClientDashboard = () => {
                 {/* Left Side - Heading and Subtitle */}
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                  <p className="text-gray-600">Welcome back, {user?.name || "User"}</p>
+                  <p className="text-gray-600">Welcome back, {user?.username || "User"}</p>
                 </div>
                 {/* Profile Card */}
                 {/* <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">

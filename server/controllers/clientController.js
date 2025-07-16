@@ -1,6 +1,4 @@
 import Project from '../models/Project.js';
-
-
 import mongoose from 'mongoose';
 import Client from '../models/client.js';
 export const addProject = async (req, res) => {
@@ -67,10 +65,8 @@ export const addProject = async (req, res) => {
 
 export const getProjectsByClientID = async (req, res) => {
     const clientId = req.params.id;
-    try{
-     
-     
-         const projects = await Project.find({ client: clientId });
+    try{ 
+        const projects = await Project.find({ client: clientId });
          if (!projects || projects.length === 0) {
               return res.status(404).json({ message: 'No projects found for this client' });
          }
@@ -194,5 +190,52 @@ export const declineProposal = async (req, res) => {
   } catch (error) {
     console.error("Decline Proposal Error:", error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const getClientDashboard = async (req, res) => {
+  try {
+    // Get clientId from user, query, or body
+    const clientId = req.user?.id || req.query.clientId || req.body.clientId;
+    if (!clientId) return res.status(400).json({ message: 'clientId is required' });
+
+    // Get stats
+    const activeProjects = await Project.countDocuments({ client: clientId, status: 'In Progress' });
+    const proposalsReceived = await Project.aggregate([
+      { $match: { client: new mongoose.Types.ObjectId(clientId) } },
+      { $project: { proposalCount: { $size: "$applicants" } } },
+      { $group: { _id: null, total: { $sum: "$proposalCount" } } }
+    ]);
+    const totalBudget = await Project.aggregate([
+      { $match: { client: new mongoose.Types.ObjectId(clientId) } },
+      { $group: { _id: null, sum: { $sum: "$budget" } } }
+    ]);
+
+    const pendingPayments = await Project.countDocuments({ client: clientId, status: 'Payment Pending' });
+
+    // Recent Projects
+    const recentProjects = await Project.find({ client: clientId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // Notifications
+    // const notifications = await Notification.find({ client: clientId })
+    //   .sort({ createdAt: -1 })
+    //   .limit(5);
+
+    res.status(200).json({
+      stats: {
+        activeProjects,
+        pendingPayments,
+        proposalsReceived: proposalsReceived[0]?.total || 0,
+        totalBudget: totalBudget[0]?.sum || 0,
+      },
+      recentProjects,
+      // notifications,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error declining proposal', error });
+    console.error("Dashboard fetch error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

@@ -93,7 +93,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {user?.name?.charAt(0) || "U"}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{user?.name || "User"}</div>
+            <div className="font-semibold text-gray-900">{user?.username || "User"}</div>
             <div className="text-xs text-gray-500">{user?.email}</div>
           </div>
         </div>
