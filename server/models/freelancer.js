@@ -45,6 +45,12 @@ const freelancerSchema = new mongoose.Schema({
         type: String,
         // required: true,
     },
+
+    role: {
+        type: String,
+        default: 'freelancer',
+        enum: ['freelancer'],
+    },
     projects:{
         type: [{
             type: mongoose.Schema.Types.ObjectId,

@@ -23,27 +23,8 @@ import {
   Menu
 } from 'lucide-react';
 
-// Create axios instance with base URL
-const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import useUserStore from '../../store/userStore';
 
-// Add request interceptor to include token
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 const ClientDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,14 +40,9 @@ const ClientDashboard = () => {
     recentProjects: [],
     notifications: []
   });
+  const user = useUserStore((state) => state.user);
 
-  // Get client ID from localStorage or token
-  const getClientId = () => {
-    // You can decode the token to get client ID or store it separately
-    const clientId = '64e92fa3a12d8c3f3c88d9b2';
-    return clientId;
-  };
-
+  // Mock API calls - replace with actual backend endpoints
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -318,9 +294,42 @@ const ClientDashboard = () => {
               >
                 <Menu className="w-6 h-6 text-gray-500" />
               </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-600">Welcome back, Client</p>
+              <div className="flex items-center justify-between px-6 py-4">
+                {/* Left Side - Heading and Subtitle */}
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-gray-600">Welcome back, {user?.name || "User"}</p>
+                </div>
+                {/* Profile Card */}
+                <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {user?.name?.charAt(0) || "U"}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">{user?.name || "User"}</div>
+                    <div className="text-xs text-gray-500">{user?.email}</div>
+                  </div>
+                </div>
+                {/* Right Side - Bell and Button */}
+                <div className="flex items-center space-x-6">
+                  <div className="relative">
+                    <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                      <Bell className="w-6 h-6" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handlePostNewProject}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Post Project</span>
+                  </button>
+                </div>
               </div>
             </div>
 
