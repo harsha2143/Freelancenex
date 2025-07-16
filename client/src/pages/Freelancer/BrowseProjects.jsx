@@ -1,7 +1,8 @@
 // index.js
-import React, { useState } from "react";
-import { Search, Filter, DollarSign, Calendar, MapPin, Star, Clock, Users,Menu } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Filter, DollarSign, Calendar, MapPin, Star, Clock, Users, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
+import axiosInstance from "../../api/axiosInstance";
 // Mock useAuth hook
 const useAuth = () => ({
     user: { id: 1, name: "Freelancer" },
@@ -124,183 +125,139 @@ const BrowseProjects = () => {
     const [projectLength, setProjectLength] = useState("all");
     const [verifiedOnly, setVerifiedOnly] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const projects = [
-        {
-            id: 1,
-            title: "React Native Mobile App Development",
-            description:
-                "Looking for an experienced React Native developer to build a cross-platform mobile app for our food delivery service. The app should include user authentication, real-time tracking, payment integration, and push notifications.",
-            budget: { type: "fixed", amount: 4500, min: null, max: null },
-            deadline: "2024-03-15",
-            category: "mobile_development",
-            skills: ["React Native", "JavaScript", "API Integration", "Firebase"],
-            client: {
-                name: "TechCorp Inc.",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.8,
-                verified: true,
-                location: "United States",
-                totalSpent: 25000,
-                projectsPosted: 12,
-            },
-            proposals: 8,
-            postedTime: "2 hours ago",
-            experienceLevel: "intermediate",
-            projectLength: "1_to_3_months",
-            featured: true,
-        },
-        {
-            id: 2,
-            title: "WordPress Website Redesign",
-            description:
-                "Need to redesign our existing WordPress website with a modern, responsive design. The site should be optimized for SEO and mobile devices. Experience with WooCommerce is a plus.",
-            budget: { type: "range", amount: null, min: 1500, max: 2500 },
-            deadline: "2024-02-28",
-            category: "web_development",
-            skills: ["WordPress", "PHP", "CSS", "JavaScript", "WooCommerce"],
-            client: {
-                name: "Sarah Johnson",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.6,
-                verified: false,
-                location: "Canada",
-                totalSpent: 8500,
-                projectsPosted: 5,
-            },
-            proposals: 12,
-            postedTime: "5 hours ago",
-            experienceLevel: "intermediate",
-            projectLength: "less_than_1_month",
-            featured: false,
-        },
-        {
-            id: 3,
-            title: "Python Data Analysis Script",
-            description:
-                "Create a Python script to analyze sales data from CSV files. The script should generate visualizations and provide insights on sales trends, customer behavior, and product performance.",
-            budget: { type: "hourly", amount: null, min: 25, max: 40 },
-            deadline: "2024-02-20",
-            category: "data_science",
-            skills: ["Python", "Pandas", "Matplotlib", "Data Analysis"],
-            client: {
-                name: "DataCorp Analytics",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.9,
-                verified: true,
-                location: "United Kingdom",
-                totalSpent: 15000,
-                projectsPosted: 8,
-            },
-            proposals: 6,
-            postedTime: "1 day ago",
-            experienceLevel: "expert",
-            projectLength: "less_than_1_month",
-            featured: false,
-        },
-        {
-            id: 4,
-            title: "UI/UX Design for SaaS Platform",
-            description:
-                "Design a modern, intuitive user interface for our SaaS platform. We need wireframes, mockups, and a complete design system. Experience with B2B software design is preferred.",
-            budget: { type: "fixed", amount: 3200 },
-            deadline: "2024-03-10",
-            category: "ui_ux_design",
-            skills: ["UI/UX", "Figma", "Design Systems", "Prototyping"],
-            client: {
-                name: "StartupXYZ",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.7,
-                verified: true,
-                location: "Australia",
-                totalSpent: 12000,
-                projectsPosted: 6,
-            },
-            proposals: 15,
-            postedTime: "2 days ago",
-            experienceLevel: "intermediate",
-            projectLength: "1_to_3_months",
-            featured: true,
-        },
-        {
-            id: 5,
-            title: "Content Writing for Tech Blog",
-            description:
-                "Write 10 high-quality, SEO-optimized blog posts about emerging technologies. Each post should be 1500-2000 words and include proper research and citations.",
-            budget: { type: "fixed", amount: 800 },
-            deadline: "2024-03-01",
-            category: "content_writing",
-            skills: ["Content Writing", "SEO", "Tech Writing", "Research"],
-            client: {
-                name: "Mike Chen",
-                avatar: "/placeholder.svg?height=40&width=40",
-                rating: 4.5,
-                verified: false,
-                location: "Singapore",
-                totalSpent: 3500,
-                projectsPosted: 3,
-            },
-            proposals: 20,
-            postedTime: "3 days ago",
-            experienceLevel: "intermediate",
-            projectLength: "less_than_1_month",
-            featured: false,
-        },
-    ];
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axiosInstance.get(`/freelancer/projects`);
+
+            const data = response.data;
+            // console.log('Fetched projects:', data);
+
+            if (data.projects && Array.isArray(data.projects)) {
+                setProjects(data.projects);
+            } else {
+                setProjects([]);
+            }
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+            setError('Failed to fetch projects. Please try again later.');
+            setProjects([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const categories = [
         { value: "all", label: "All Categories" },
-        { value: "web_development", label: "Web Development" },
-        { value: "mobile_development", label: "Mobile Development" },
-        { value: "ui_ux_design", label: "UI/UX Design" },
-        { value: "content_writing", label: "Content Writing" },
-        { value: "data_science", label: "Data Science" },
-        { value: "digital_marketing", label: "Digital Marketing" },
+        { value: "Web Development", label: "Web Development" },
+        { value: "Mobile Development", label: "Mobile Development" },
+        { value: "UI/UX Design", label: "UI/UX Design" },
+        { value: "Content Writing", label: "Content Writing" },
+        { value: "Data Science", label: "Data Science" },
+        { value: "Digital Marketing", label: "Digital Marketing" },
+        { value: "Other", label: "Other" },
     ];
 
     const filteredProjects = projects.filter((project) => {
         const matchesSearch =
             project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.skills.some((skill) => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+            project.requiredSkills.some((skill) => skill.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const matchesCategory = categoryFilter === "all" || project.category === categoryFilter;
 
-        const projectBudget =
-            project.budget.type === "fixed"
-                ? project.budget.amount
-                : (project.budget.min + project.budget.max) / 2;
+        const projectBudget = project.budget || 0;
         const matchesBudget = projectBudget >= budgetRange[0] && projectBudget <= budgetRange[1];
 
         const matchesExperience = experienceLevel === "all" || project.experienceLevel === experienceLevel;
-        const matchesLength = projectLength === "all" || project.projectLength === projectLength;
-        const matchesVerified = !verifiedOnly || project.client.verified;
+        
+        // For project length, we'll use a simple heuristic based on deadline
+        const now = new Date();
+        const deadline = new Date(project.deadline);
+        const daysUntilDeadline = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+        
+        let projectLengthCategory = "more_than_6_months";
+        if (daysUntilDeadline <= 30) projectLengthCategory = "less_than_1_month";
+        else if (daysUntilDeadline <= 90) projectLengthCategory = "1_to_3_months";
+        else if (daysUntilDeadline <= 180) projectLengthCategory = "3_to_6_months";
+        
+        const matchesLength = projectLength === "all" || projectLengthCategory === projectLength;
 
-        return matchesSearch && matchesCategory && matchesBudget && matchesExperience && matchesLength && matchesVerified;
+        return matchesSearch && matchesCategory && matchesBudget && matchesExperience && matchesLength;
     });
 
-    const formatBudget = (budget) => {
-        if (budget.type === "fixed") {
-            return `$${budget.amount.toLocaleString()}`;
-        } else if (budget.type === "hourly") {
-            return `$${budget.min}-${budget.max}/hr`;
+    const formatBudget = (budget, budgetType) => {
+        if (budgetType === "Hourly") {
+            return `$${budget}/hr`;
         } else {
-            return `$${budget.min.toLocaleString()}-${budget.max.toLocaleString()}`;
+            return `$${budget.toLocaleString()}`;
         }
     };
 
     const getExperienceLabel = (level) => {
         switch (level) {
-            case "entry":
+            case "Entry Level":
                 return "Entry Level";
-            case "intermediate":
+            case "Intermediate":
                 return "Intermediate";
-            case "expert":
+            case "Expert":
                 return "Expert";
             default:
                 return level;
         }
     };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) return "1 day ago";
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+        return `${Math.floor(diffDays / 365)} years ago`;
+    };
+
+    if (loading) {
+        return (
+            <FreelancerLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading projects...</p>
+                    </div>
+                </div>
+            </FreelancerLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <FreelancerLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="text-red-500 mb-4">
+                            <Search className="h-12 w-12 mx-auto" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading projects</h3>
+                        <p className="text-gray-500 mb-4">{error}</p>
+                        <Button onClick={fetchProjects}>Try Again</Button>
+                    </div>
+                </div>
+            </FreelancerLayout>
+        );
+    }
 
     return (
         <FreelancerLayout>
@@ -310,8 +267,6 @@ const BrowseProjects = () => {
                 <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-6">
                     <Menu className="w-6 h-6 text-gray-500" />
                 </button>
-                {/* Filters Sidebar */}
-                
 
                 {/* Projects List */}
                 <div className="lg:col-span-3 space-y-6">
@@ -338,12 +293,12 @@ const BrowseProjects = () => {
                         ) : (
                             filteredProjects.map((project) => (
                                 <Card
-                                    key={project.id}
-                                    className={`hover:shadow-lg transition-shadow ${project.featured ? "ring-2 ring-yellow-200 bg-yellow-50" : ""
+                                    key={project._id}
+                                    className={`hover:shadow-lg transition-shadow ${project.isFeatured ? "ring-2 ring-yellow-200 bg-yellow-50" : ""
                                         }`}
                                 >
                                     <CardContent className="pt-6">
-                                        {project.featured && (
+                                        {project.isFeatured && (
                                             <Badge className="mb-3">⭐ Featured Project</Badge>
                                         )}
 
@@ -353,7 +308,7 @@ const BrowseProjects = () => {
                                                 <p className="text-gray-600 mb-3 line-clamp-3">{project.description}</p>
 
                                                 <div className="flex flex-wrap gap-1 mb-3">
-                                                    {project.skills.map((skill, index) => (
+                                                    {project.requiredSkills.map((skill, index) => (
                                                         <Badge key={index} variant="outline" className="text-xs">
                                                             {skill}
                                                         </Badge>
@@ -362,42 +317,10 @@ const BrowseProjects = () => {
                                             </div>
 
                                             <div className="text-right ml-4">
-                                                <p className="text-xl font-bold text-green-600">{formatBudget(project.budget)}</p>
+                                                <p className="text-xl font-bold text-green-600">{formatBudget(project.budget, project.budgetType)}</p>
                                                 <p className="text-sm text-gray-500">
-                                                    {project.budget.type === "hourly" ? "Hourly" : "Fixed Price"}
+                                                    {project.budgetType}
                                                 </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Client Info */}
-                                        <div className="flex items-center text-black gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                                            <Avatar>
-                                                <AvatarImage src={project.client.avatar} />
-                                                <AvatarFallback>{project.client.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-medium">{project.client.name}</p>
-                                                    {project.client.verified && (
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            ✓ Verified
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                                                        <span>{project.client.rating}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <MapPin className="h-3 w-3" />
-                                                        <span>{project.client.location}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <DollarSign className="h-3 w-3" />
-                                                        <span>${project.client.totalSpent.toLocaleString()} spent</span>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
 
@@ -409,11 +332,11 @@ const BrowseProjects = () => {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Users className="h-4 w-4 text-gray-800" />
-                                                <span>{project.proposals} proposals</span>
+                                                <span>{project.applicants ? project.applicants.length : 0} proposals</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Clock className="h-4 w-4 text-gray-800" />
-                                                <span>Posted {project.postedTime}</span>
+                                                <span>Posted {formatDate(project.createdAt)}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Badge variant="outline" className="text-xs">
@@ -429,12 +352,12 @@ const BrowseProjects = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
-                                
                             ))
-                            
                         )}
                     </div>
                 </div>
+
+                {/* Filters Sidebar */}
                 <div className="lg:col-span-1">
                     <Card className="sticky top-6">
                         <CardHeader>
@@ -444,7 +367,7 @@ const BrowseProjects = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {/*dial tone sound Search */}
+                            {/* Search */}
                             <div className="space-y-2 text-black">
                                 <label className="text-sm text-black font-medium">Search</label>
                                 <div className="relative">
@@ -503,9 +426,9 @@ const BrowseProjects = () => {
                                     </SelectTrigger>
                                     <SelectContent className="text-black">
                                         <SelectItem value="all">All Levels</SelectItem>
-                                        <SelectItem value="entry">Entry Level</SelectItem>
-                                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                                        <SelectItem value="expert">Expert</SelectItem>
+                                        <SelectItem value="Entry Level">Entry Level</SelectItem>
+                                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                        <SelectItem value="Expert">Expert</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -525,18 +448,6 @@ const BrowseProjects = () => {
                                         <SelectItem value="more_than_6_months">More than 6 months</SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
-
-                            {/* Verified Clients Only */}
-                            <div className="flex items-center text-black space-x-2">
-                                <Checkbox
-                                    id="verified"
-                                    checked={verifiedOnly}
-                                    onCheckedChange={setVerifiedOnly}
-                                />
-                                <label htmlFor="verified" className="text-sm text-black font-medium">
-                                    Verified clients only
-                                </label>
                             </div>
                         </CardContent>
                     </Card>

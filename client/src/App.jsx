@@ -6,19 +6,23 @@ import FreelancerProfile from './pages/Shared/FreelancerProfile'
 import ClientDashboard from './pages/Client/Dashboard';
 import FreelancerDashboard from './pages/Freelancer/Dashboard';
 import NewProject from './pages/Client/NewProject';
-import FreelancerProposals from './pages/Freelancer/MyProposals';
+import MyApplications from './pages/Freelancer/MyApplications';
 import ActiveProjects from './pages/Freelancer/ActiveProjects';
 import BrowseProjects from './pages/Freelancer/BrowseProjects';
 // import Chat from './pages/Shared/Chat';
 import ClientProjects from './pages/Client/Projects';
 import Login from './pages/Shared/Login';
+
 import ProtectedRoute from './components/ProtectedRoute';
 
+
+import Projects from './pages/Client/Proje
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path='/login' element={<Login />} />
+
       <Route path='/client/profile' element={
         <ProtectedRoute role="client">
           <ClientProfile />
@@ -40,12 +44,13 @@ const App = () => {
         </ProtectedRoute>
       } />
       <Route path='/freelancer/my-proposals' element={<FreelancerProposals />} />
+
+      <Route path='/freelancer/my-applications' element={<MyApplications />} />
+
       <Route path='/freelancer/active-projects' element={<ActiveProjects />} />
-       <Route path='/freelancer/browse-projects' element={<BrowseProjects/>} />
+      <Route path='/freelancer/browse-projects' element={<BrowseProjects/>} />
       <Route path='/client/post-projects' element={<NewProject />} />
       <Route path='/client/projects' element={<ClientProjects />} />
-
-
     </Routes>
   )
 }

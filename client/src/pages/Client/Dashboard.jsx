@@ -21,7 +21,10 @@ import {
   Briefcase,
   Menu
 } from 'lucide-react';
+
 import useUserStore from '../../store/userStore';
+import axiosInstance from '../../api/axiosInstance';
+
 
 const ClientDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,114 +49,12 @@ const ClientDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       // Backend API call syntax
-      /*
-      const response = await fetch('/api/client/dashboard', {
-        method: 'GET',
+      const response = await axiosInstance.get('/client/dashboard', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
         }
       });
-      const data = await response.json();
-      setDashboardData(data);
-      */
-
-      // Demo data
-      setTimeout(() => {
-        setDashboardData({
-          stats: {
-            activeProjects: 3,
-            pendingPayments: 2,
-            proposalsReceived: 8,
-            totalBudget: 8800
-          },
-          recentProjects: [
-            {
-              id: 1,
-              title: 'E-commerce Website Development',
-              status: 'In Progress',
-              freelancer: 'Sarah Johnson',
-              budget: 5000,
-              dueDate: '2024-02-15',
-              progress: 65
-            },
-            {
-              id: 2,
-              title: 'Mobile App UI/UX Design',
-              status: 'Pending Proposals',
-              freelancer: null,
-              budget: 3000,
-              proposalCount: 8,
-              progress: 0
-            },
-            {
-              id: 3,
-              title: 'Content Writing for Blog',
-              status: 'Completed',
-              freelancer: 'Mike Chen',
-              budget: 800,
-              dueDate: '2024-01-30',
-              progress: 100
-            }
-          ],
-          recentActivity: [
-            {
-              id: 1,
-              type: 'proposal',
-              title: 'New proposal received for E-commerce Website Development',
-              time: '2 hours ago',
-              icon: User
-            },
-            {
-              id: 2,
-              type: 'milestone',
-              title: "Milestone 'Homepage Design' completed by Sarah Johnson",
-              time: '1 day ago',
-              icon: CheckCircle
-            },
-            {
-              id: 3,
-              type: 'payment',
-              title: 'Payment of $800 released to Mike Chen',
-              time: '2 days ago',
-              icon: DollarSign
-            },
-            {
-              id: 4,
-              type: 'message',
-              title: 'New message from Sarah Johnson',
-              time: '3 days ago',
-              icon: MessageSquare
-            }
-          ],
-          notifications: [
-            {
-              id: 1,
-              type: 'proposal',
-              title: 'New Proposal Received',
-              message: 'You have 3 new proposals for Mobile App UI/UX Design project',
-              time: '1 hour ago',
-              unread: true
-            },
-            {
-              id: 2,
-              type: 'milestone',
-              title: 'Milestone Completed',
-              message: 'Sarah Johnson completed the Homepage Design milestone',
-              time: '1 day ago',
-              unread: true
-            },
-            {
-              id: 3,
-              type: 'payment',
-              title: 'Payment Due',
-              message: 'Payment for completed milestone is ready for release',
-              time: '2 days ago',
-              unread: false
-            }
-          ]
-        });
-      }, 1000);
+      setDashboardData(response.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     }
@@ -178,41 +79,32 @@ const ClientDashboard = () => {
     */
   };
 
-  const handlePostNewProject = async () => {
+  const handlePostNewProject = async (projectData) => {
     // Backend API call for posting new project
-    /*
     try {
-      const response = await fetch('/api/client/projects', {
-        method: 'POST',
+      const response = await axiosInstance.post('/client/projects', projectData, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(projectData)
+        }
       });
       // Handle response
+      return response.data;
     } catch (error) {
       console.error('Error posting project:', error);
     }
-    */
-    console.log('Redirecting to post new project...');
   };
 
   const markNotificationAsRead = async (notificationId) => {
     // Backend API call to mark notification as read
-    /*
     try {
-      await fetch(`/api/client/notifications/${notificationId}/read`, {
-        method: 'PUT',
+      await axiosInstance.put(`/client/notifications/${notificationId}/read`, {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
         }
       });
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
-    */
 
     setDashboardData(prev => ({
       ...prev,
