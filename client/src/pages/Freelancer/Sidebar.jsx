@@ -9,9 +9,10 @@ import {
   MessageSquare, 
   User, 
   Settings, 
-  Star ,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
+import useUserStore from '../../store/userStore';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigationItems = [
@@ -24,6 +25,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { id: 'profile', label: 'Profile', icon: User, path: '/freelancer/profile' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/freelancer/settings' },
   ];
+  const clearUser = useUserStore((state) => state.clearUser);
+
+  const handleLogout = () => {
+    clearUser();
+    window.location.href = '/login';
+  };
 
   return (
     <>
@@ -80,20 +87,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
       </nav>
 
-      {/* Footer */}
+      {/* Logout Button */}
       <div className="p-6 border-t border-gray-200">
-        <div className="flex items-center">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-700">H</span>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">harsha</p>
-            <div className="flex items-center">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="ml-1 text-sm text-gray-600">4.9 (12 reviews)</span>
-            </div>
-          </div>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          Logout
+        </button>
       </div>
     </div>
 

@@ -28,7 +28,7 @@ const register = async (req, res) => {
                 return res.status(400).json({ error: 'Email already exists' });
             }
             // Create a new client  
-            const newUser = new Client({ username, password: hashedPassword, name, email });
+            const newUser = new Client({ username, password: hashedPassword, name, email, role: 'client' });
             if (newUser) {
                 generateToken(newUser._id, res);
                 await newUser.save();
@@ -37,7 +37,8 @@ const register = async (req, res) => {
                     id: newUser._id,
                     username: newUser.username,
                     name: newUser.name,
-                    email: newUser.email
+                    email: newUser.email,
+                    role: 'client'
                 });
             }
         } else if (role === 'freelancer') {
@@ -52,7 +53,7 @@ const register = async (req, res) => {
                 return res.status(400).json({ error: 'Email already exists' });
             }
             // Create a new freelancer
-            const newUser = new Freelancer({ username, password: hashedPassword, name, email });
+            const newUser = new Freelancer({ username, password: hashedPassword, name, email, role: 'freelancer' });
             if (newUser) {
                 generateToken(newUser._id, res);
                 await newUser.save();
@@ -61,7 +62,8 @@ const register = async (req, res) => {
                     id: newUser._id,
                     username: newUser.username,
                     name: newUser.name,
-                    email: newUser.email
+                    email: newUser.email,
+                    role: 'freelancer'
                 });
             }
         } else {
@@ -81,7 +83,7 @@ const login = async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        let user; // ✅ declare outside the if blocks
+        let user; 
 
         if (role === 'client') {
             user = await Client.findOne({ email });
@@ -108,7 +110,9 @@ const login = async (req, res) => {
             message: 'User logged in successfully',
             id: user._id,
             email: user.email,
-            role
+            username: user.username,
+            name: user.name,
+            role: user.role
         });
     } catch (error) {
         console.error("Error in Login Controller:", error);

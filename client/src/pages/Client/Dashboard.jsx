@@ -21,7 +21,10 @@ import {
   Briefcase,
   Menu
 } from 'lucide-react';
+
+import useUserStore from '../../store/userStore';
 import axiosInstance from '../../api/axiosInstance';
+
 
 const ClientDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,6 +39,7 @@ const ClientDashboard = () => {
     // recentActivity: [],
     notifications: []
   });
+  const user = useUserStore((state) => state.user);
 
   // Mock API calls - replace with actual backend endpoints
   useEffect(() => {
@@ -157,7 +161,17 @@ const ClientDashboard = () => {
                 {/* Left Side - Heading and Subtitle */}
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                  <p className="text-gray-600">Welcome back, Saripalli Harshavardhan</p>
+                  <p className="text-gray-600">Welcome back, {user?.name || "User"}</p>
+                </div>
+                {/* Profile Card */}
+                <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {user?.name?.charAt(0) || "U"}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">{user?.name || "User"}</div>
+                    <div className="text-xs text-gray-500">{user?.email}</div>
+                  </div>
                 </div>
                 {/* Right Side - Bell and Button */}
                 <div className="flex items-center space-x-6">

@@ -39,6 +39,11 @@ const clientSchema = new mongoose.Schema({
         type: String,
         // required: true,
     },
+    role: {
+        type: String,
+        default: 'client',
+        enum: ['client'],
+    },
 });
 
 const Client = mongoose.model("Client", clientSchema);
