@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 
 import useUserStore from '../../store/userStore';
+import axiosInstance from '../../api/axiosInstance';
+
 
 
 const ClientDashboard = () => {
@@ -52,13 +54,16 @@ const ClientDashboard = () => {
       setLoading(true);
       setError(null);
 
-      const clientId = '64e92fa3a12d8c3f3c88d9b2';
+      const clientId = user.id;
       if (!clientId) {
         throw new Error('Client ID not found. Please log in again.');
       }
 
       // Call your dashboard endpoint with clientId as query parameter
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/client/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
         params: { clientId }
       });
 
@@ -294,14 +299,14 @@ const ClientDashboard = () => {
               >
                 <Menu className="w-6 h-6 text-gray-500" />
               </button>
-              <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center justify-between px-4">
                 {/* Left Side - Heading and Subtitle */}
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
                   <p className="text-gray-600">Welcome back, {user?.name || "User"}</p>
                 </div>
                 {/* Profile Card */}
-                <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">
+                {/* <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">
                   <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                     {user?.name?.charAt(0) || "U"}
                   </div>
@@ -309,27 +314,8 @@ const ClientDashboard = () => {
                     <div className="font-semibold text-gray-900">{user?.name || "User"}</div>
                     <div className="text-xs text-gray-500">{user?.email}</div>
                   </div>
-                </div>
-                {/* Right Side - Bell and Button */}
-                <div className="flex items-center space-x-6">
-                  <div className="relative">
-                    <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                      <Bell className="w-6 h-6" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                  <button
-                    onClick={handlePostNewProject}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Post Project</span>
-                  </button>
-                </div>
+                </div> */}
+                
               </div>
             </div>
 

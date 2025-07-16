@@ -14,7 +14,6 @@ router.get('/check', checkAuth, (req, res) => {
         id: req.user._id,
         email: req.user.email,
         username: req.user.username,
-        name: req.user.name,
         role: req.user.role
     });
 });

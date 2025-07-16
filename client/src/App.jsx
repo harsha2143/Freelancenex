@@ -9,15 +9,13 @@ import NewProject from './pages/Client/NewProject';
 import MyApplications from './pages/Freelancer/MyApplications';
 import ActiveProjects from './pages/Freelancer/ActiveProjects';
 import BrowseProjects from './pages/Freelancer/BrowseProjects';
-import Applicants from './pages/Client/Applicants';
+// import Applicants from './pages/Client/Applicants';
 // import Chat from './pages/Shared/Chat';
 import ClientProjects from './pages/Client/Projects';
 import Login from './pages/Shared/Login';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
-
-import Projects from './pages/Client/Project'
 const App = () => {
   return (
     <Routes>
@@ -44,7 +42,6 @@ const App = () => {
           <FreelancerDashboard />
         </ProtectedRoute>
       } />
-      <Route path='/freelancer/my-proposals' element={<FreelancerProposals />} />
 
       <Route path='/freelancer/my-applications' element={<MyApplications />} />
 
@@ -52,7 +49,7 @@ const App = () => {
       <Route path='/freelancer/browse-projects' element={<BrowseProjects/>} />
       <Route path='/client/post-projects' element={<NewProject />} />
       <Route path='/client/projects' element={<ClientProjects />} />
-      <Route path='/client/applicants' element={<Applicants />} />
+      {/* <Route path='/client/applicants' element={<Applicants />} /> */}
     </Routes>
   )
 }

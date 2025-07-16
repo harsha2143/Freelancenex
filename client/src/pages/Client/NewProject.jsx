@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Upload, X, DollarSign, Calendar, FileText, Tag, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
+import useUserStore from '../../store/userStore';
+
 
 export default function NewProject() {
     const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +13,7 @@ export default function NewProject() {
     const [customSkill, setCustomSkill] = useState("");
     const fileInputRef = useRef(null);
     const inputRef = useRef(null);
+    const user = useUserStore((state) => state.user);
 
     useEffect(() => {
         if (skillInput === "other" && inputRef.current) {
@@ -134,16 +137,19 @@ export default function NewProject() {
                 deadline: projectData.deadline,
                 requiredSkills,
                 customSkills,
-                client: "68738184c60db42071ca5a30", // Replace with dynamic client ID later
+                client: user.id, // Replace with dynamic client ID later
                 category: projectData.category.replace(/_/g, " "),
                 experienceLevel: mapExperience(projectData.experienceLevel),
                 files: fileUrls, // Include Cloudinary URLs
             };
 
             const res = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/client/addProject`,
+                `${import.meta.env.VITE_BACKEND_URL}/client/addProject`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
                 payload
-            );
+            });
 
             alert("✅ Project posted successfully!");
             console.log(res.data);

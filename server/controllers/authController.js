@@ -5,8 +5,9 @@ import { generateToken } from '../config/utils.js';
 
 const register = async (req, res) => {
     try {
-        const { username, password, name, email, role } = req.body;
-        if (!username || !password || !name || !email || !role) {
+        const { username, password, email, role } = req.body;
+        console.log(req.body)
+        if (!username || !password || !email || !role) {
             return res.status(400).json({ error: 'All fields are required' });
         }
         if (password.length < 6) {
@@ -28,7 +29,7 @@ const register = async (req, res) => {
                 return res.status(400).json({ error: 'Email already exists' });
             }
             // Create a new client  
-            const newUser = new Client({ username, password: hashedPassword, name, email, role: 'client' });
+            const newUser = new Client({ username, password: hashedPassword, email, role: 'client' });
             if (newUser) {
                 generateToken(newUser._id, res);
                 await newUser.save();
@@ -36,7 +37,6 @@ const register = async (req, res) => {
                     message: 'Client registered successfully',
                     id: newUser._id,
                     username: newUser.username,
-                    name: newUser.name,
                     email: newUser.email,
                     role: 'client'
                 });
@@ -53,7 +53,7 @@ const register = async (req, res) => {
                 return res.status(400).json({ error: 'Email already exists' });
             }
             // Create a new freelancer
-            const newUser = new Freelancer({ username, password: hashedPassword, name, email, role: 'freelancer' });
+            const newUser = new Freelancer({ username, password: hashedPassword, email, role: 'freelancer' });
             if (newUser) {
                 generateToken(newUser._id, res);
                 await newUser.save();
@@ -61,7 +61,6 @@ const register = async (req, res) => {
                     message: 'Freelancer registered successfully',
                     id: newUser._id,
                     username: newUser.username,
-                    name: newUser.name,
                     email: newUser.email,
                     role: 'freelancer'
                 });

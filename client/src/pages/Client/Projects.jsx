@@ -13,12 +13,13 @@ import {
   Menu,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
-import { useParams } from "react-router-dom";
+import useUserStore from '../../store/userStore';
+
 // import { useParams } from "react-router-dom";
 
 export default function ClientProjects() {
-  const { clientId }= useParams(); // ✅ Correct
   // assumes route: /projects/:clientId
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -28,11 +29,20 @@ export default function ClientProjects() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = useUserStore((state) => state.user);
+  console.log(user)
+
+  const clientId =user?.id;
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/client/getProjects/${clientId}`
+          `${import.meta.env.VITE_BACKEND_URL}/client/getProjects/${clientId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
         );
         setProjects(response.data.projects);
         console.log(response.data.projects);
@@ -170,8 +180,8 @@ export default function ClientProjects() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === tab.key
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
               >
                 {tab.label} ({projectsByStatus[tab.key].length})

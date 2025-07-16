@@ -18,12 +18,14 @@ const LoginSignupPage = () => {
   const [loginData, setLoginData] = useState({
     email: '',
     password: '',
+    role:''
   });
 
   const [signupData, setSignupData] = useState({
     username: '',
     email: '',
     password: '',
+    role:''
   });
 
   // Social login icons as SVG components
@@ -102,13 +104,19 @@ const LoginSignupPage = () => {
 
 
   const handleSignup = async () => {
+    // Frontend validation for empty fields
+    if (!signupData.username.trim() || !signupData.email.trim() || !signupData.password.trim()) {
+      setMessage({ type: 'error', text: 'Please fill in all fields.' });
+      return;
+    }
     setLoading(true);
     setMessage({ type: '', text: '' });
 
     try {
       const response = await axios.post(
         `${BACKEND_URL}/auth/register`,
-        { ...signupData, role: userType },
+        { signupData, role: userType },
+
         {
           headers: {
             'Content-Type': 'application/json',
@@ -118,7 +126,7 @@ const LoginSignupPage = () => {
       );
 
       const data = response.data;
-
+      console.log(data)
       if (response.status !== 201) {
         throw new Error(data.message || 'Registration failed');
       }
@@ -127,11 +135,11 @@ const LoginSignupPage = () => {
       setTimeout(() => {
         setIsLogin(true);
         setMessage({ type: '', text: '' });
-        setSignupData({ username: '', email: '', password: '' });
+        setSignupData({ username: '', email: '', password: '',role:'' });
       }, 2000);
 
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'An error occurred during registration' });
+      setMessage({ type: 'error', text: error.response?.data?.message || error.message || 'An error occurred during registration' });
     } finally {
       setLoading(false);
     }

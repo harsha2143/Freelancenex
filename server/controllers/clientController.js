@@ -67,7 +67,6 @@ export const addProject = async (req, res) => {
 export const getProjectsByClientID = async (req, res) => {
   const clientId = req.params.id;
   try {
-
     const projects = await Project.find({ client: clientId });
     if (!projects || projects.length === 0) {
       return res.status(404).json({ message: 'No projects found for this client' });
