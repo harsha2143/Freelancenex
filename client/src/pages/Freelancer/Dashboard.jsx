@@ -262,21 +262,17 @@ const FreelancerDashboard = () => {
       <div className="flex-1 flex flex-col lg:ml-64">
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-6">
+          <div className="flex items-center justify-between py-4 px-8">
             <div className="flex items-center">
               <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
                 <Menu className="w-6 h-6 text-gray-500" />
               </button>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search projects, skills..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-96 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
+              <div>
+              <h1 className="text-2xl font-bold text-gray-900">Welcome back, harsha!</h1>
+              <p className="text-gray-600">Ready to take on new challenges today?</p>
             </div>
-            <div className="flex items-center space-x-4">
+            </div>
+            <div className="flex items-center space-x-8">
               <div className="relative">
                 <Bell className="w-6 h-6 text-gray-500" />
                 {notifications.length > 0 && (
@@ -285,7 +281,7 @@ const FreelancerDashboard = () => {
                   </span>
                 )}
               </div>
-              <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center">
+              <button className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 flex items-center">
                 <Search className="w-4 h-4 mr-2" />
                 Browse Projects
               </button>
@@ -295,33 +291,17 @@ const FreelancerDashboard = () => {
 
         {/* Main Body */}
         <main className="p-6 flex-1 overflow-y-auto">
-          {/* Welcome Section */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Welcome back, harsha!</h1>
-              <p className="text-gray-600">Ready to take on new challenges today?</p>
-            </div>
-            <button className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 flex items-center">
-              <Search className="w-5 h-5 mr-2" />
-              Browse Projects
-            </button>
-          </div>
-
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <StatCard
               title="Active Projects"
               value={dashboardData.activeProjects}
-              change={dashboardData.weeklyChange}
-              changeText="this week"
               icon={Briefcase}
               color="bg-blue-600"
             />
             <StatCard
               title="Total Earnings"
               value={`$${dashboardData.totalEarnings.toLocaleString()}`}
-              change={dashboardData.monthlyEarningsChange}
-              changeText="from last month"
               icon={DollarSign}
               color="bg-green-600"
             />
