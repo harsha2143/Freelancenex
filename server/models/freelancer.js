@@ -45,6 +45,11 @@ const freelancerSchema = new mongoose.Schema({
         type: String,
         // required: true,
     },
+    role: {
+        type: String,
+        default: 'freelancer',
+        enum: ['freelancer'],
+    },
 });
 
 const Freelancer = mongoose.model("Freelancer", freelancerSchema);

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import axios from 'axios';
-const BACKEND_URL = import.meta.env.BACKEND_URL;
+import { useNavigate } from 'react-router-dom';
+import useUserStore from '../../store/userStore';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +12,8 @@ const LoginSignupPage = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [userType, setUserType] = useState('freelancer');
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
 
   const [loginData, setLoginData] = useState({
     email: '',
@@ -50,34 +54,51 @@ const LoginSignupPage = () => {
     // TODO: Implement actual social login redirects (e.g., OAuth flow)
   };
 
-const handleLogin = async () => {
-  setLoading(true);
-  setMessage({ type: '', text: '' });
+  const handleLogin = async () => {
+    setLoading(true);
+    setMessage({ type: '', text: '' });
 
-  try {
-    const response = await axios.post(`${BACKEND_URL}/api/auth/login`, loginData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/auth/login`,
+        { ...loginData, role: userType },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
 
-    const data = response.data;
+      const data = response.data;
 
-    setMessage({ type: 'success', text: data.message });
-    console.log('Login successful, token:', data.token);
-    localStorage.setItem('token', data.token);
-  } catch (error) {
-    setMessage({
-      type: 'error',
-      text:
-        error.response?.data?.message ||
-        error.message ||
-        'An error occurred during login',
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      setMessage({ type: 'success', text: data.message });
+      setUser({
+        id: data.id,
+        email: data.email,
+        username: data.username,
+        name: data.name,
+        role: data.role,
+      });
+      // Redirect to dashboard based on role
+      if (data.role === 'client') {
+        navigate('/client/dashboard');
+      } else if (data.role === 'freelancer') {
+        navigate('/freelancer/dashboard');
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          'An error occurred during login',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const handleSignup = async () => {
@@ -85,17 +106,20 @@ const handleLogin = async () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...signupData, userType }),
-      });
+      const response = await axios.post(
+        `${BACKEND_URL}/auth/register`,
+        { ...signupData, role: userType },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (!response.ok) {
+      if (response.status !== 201) {
         throw new Error(data.message || 'Registration failed');
       }
 
