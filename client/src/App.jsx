@@ -17,7 +17,7 @@ import Login from './pages/Shared/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
-import Projects from './pages/Client/Proje
+import Projects from './pages/Client/Project'
 const App = () => {
   return (
     <Routes>
