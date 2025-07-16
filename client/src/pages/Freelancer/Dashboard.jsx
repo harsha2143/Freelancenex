@@ -18,115 +18,66 @@ import {
   User,
   Menu
 } from 'lucide-react';
+import axiosInstance from '../../api/axiosInstance'; 
 
 const FreelancerDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [dashboardData, setDashboardData] = useState({
-    activeProjects: 2,
-    totalEarnings: 8500,
-    pendingProposals: 5,
-    completedProjects: 12,
-    successRate: 95,
-    weeklyChange: 1,
-    monthlyEarningsChange: 12
-  });
+  const [dashboardData, setDashboardData] = useState({});
+  const [activeProjects, setActiveProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [recentlyWorkedProjects, setRecentlyWorkedProjects] = useState([]);
 
-  const [activeProjects, setActiveProjects] = useState([
-    {
-      id: 1,
-      title: "E-commerce Website Development",
-      client: "TechCorp Inc.",
-      amount: 5000,
-      dueDate: "15/02/2024",
-      progress: 65,
-      status: "In Progress"
-    },
-    {
-      id: 2,
-      title: "Mobile App Backend API",
-      client: "StartupXYZ",
-      amount: 3500,
-      dueDate: "28/02/2024",
-      progress: 30,
-      status: "In Progress"
-    }
-  ]);
+  // Get freelancer ID from localStorage or context
+  const getFreelancerId = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.id || user?._id || '68737c718a4b0e09448f541b'; // Fallback for testing
+  };
 
-  const [recentOpportunities, setRecentOpportunities] = useState([
-    {
-      id: 1,
-      title: "React Native Mobile App Development",
-      budget: "$3,000 - $5,000",
-      skills: ["React Native", "JavaScript", "API Integration"],
-      postedTime: "2 hours ago",
-      proposalCount: 8,
-      clientType: "Verified Client"
-    },
-    {
-      id: 2,
-      title: "WordPress Website Redesign",
-      budget: "$1,500 - $2,500",
-      skills: ["WordPress", "PHP", "CSS", "JavaScript"],
-      postedTime: "5 hours ago",
-      proposalCount: 12,
-      clientType: "New Client"
-    }
-  ]);
-
-  const [recentActivity, setRecentActivity] = useState([
-    {
-      id: 1,
-      type: "milestone_funded",
-      message: "Milestone 'Database Setup' has been funded by TechCorp Inc.",
-      time: "1 hour ago",
-      amount: 1500,
-      icon: DollarSign,
-      color: "text-green-600"
-    },
-    {
-      id: 2,
-      type: "proposal_viewed",
-      message: "Your proposal for 'React Native Mobile App' was viewed",
-      time: "3 hours ago",
-      icon: Eye,
-      color: "text-blue-600"
-    },
-    {
-      id: 3,
-      type: "project_completed",
-      message: "Project 'Logo Design' marked as completed",
-      time: "2 days ago",
-      amount: 500,
-      icon: CheckCircle,
-      color: "text-purple-600"
-    }
-  ]);
-
-  // Simulate API calls
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        console.log('Fetching dashboard data...');
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      }
-    };
-
-    const fetchNotifications = async () => {
-      try {
-        setNotifications([
-          { id: 1, message: "New project match found", unread: true },
-          { id: 2, message: "Proposal accepted", unread: true }
-        ]);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    };
-
     fetchDashboardData();
-    fetchNotifications();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Fetch all projects for this freelancer
+      const freelancerId = getFreelancerId();
+      const response = await axiosInstance.get(`/freelancer/active-projects/${freelancerId}`);
+      const projects = response.data.projects || [];
+      console.log("Fetched projects:", projects);
+
+      // Active projects (current work)
+      setActiveProjects(projects);
+
+      // Recently worked (completed) projects, sorted by completedAt descending, top 3
+      const completedProjects = projects
+        .filter(p => p.status === 'Completed')
+        .sort((a, b) => new Date(b.completedAt || b.updatedAt || b.createdAt) - new Date(a.completedAt || a.updatedAt || a.createdAt))
+        .slice(0, 3);
+      setRecentlyWorkedProjects(completedProjects);
+
+      // Calculate stats
+      const activeProjectsCount = projects.length;
+      const completedProjectsCount = projects.filter(p => p.status === 'Completed').length;
+      const pendingProposals = projects.filter(p => p.status === 'Pending').length;
+      const totalEarnings = projects.reduce((sum, p) => sum + (p.earned || 0), 0);
+      const successRate = projects.length > 0
+        ? Math.round((completedProjectsCount / projects.length) * 100)
+        : 0;
+
+      setDashboardData({
+        activeProjects: activeProjectsCount,
+        totalEarnings,
+        pendingProposals,
+        completedProjects: completedProjectsCount,
+        successRate,
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const StatCard = ({ title, value, change, changeText, icon: Icon, color }) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -148,32 +99,31 @@ const FreelancerDashboard = () => {
     </div>
   );
 
+  // Updated ProjectCard to use real project fields
   const ProjectCard = ({ project }) => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
-          <p className="text-sm text-gray-600">{project.client}</p>
+          <p className="text-sm text-gray-600">{project.client?.name || 'Unknown Client'}</p>
         </div>
         <div className="text-right">
-          <p className="text-lg font-bold text-gray-900">${project.amount.toLocaleString()}</p>
-          <p className="text-sm text-gray-500">Due {project.dueDate}</p>
+          <p className="text-lg font-bold text-gray-900">${project.budget?.toLocaleString() || 0}</p>
+          <p className="text-sm text-gray-500">Due {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'N/A'}</p>
         </div>
       </div>
-      
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-gray-600">Progress</span>
-          <span className="text-sm font-medium text-gray-900">{project.progress}%</span>
+          <span className="text-sm font-medium text-gray-900">{project.progress || 0}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${project.progress}%` }}
+            style={{ width: `${project.progress || 0}%` }}
           ></div>
         </div>
       </div>
-
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
           {project.status}
@@ -196,32 +146,26 @@ const FreelancerDashboard = () => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900">{opportunity.title}</h3>
-          <p className="text-lg font-bold text-gray-900 mt-1">{opportunity.budget}</p>
+          <p className="text-lg font-bold text-gray-900 mt-1">${opportunity.budget?.toLocaleString() || 0}</p>
         </div>
         <button className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800">
           View Project
         </button>
       </div>
-      
       <div className="mb-4">
         <div className="flex flex-wrap gap-2">
-          {opportunity.skills.map((skill, index) => (
+          {(opportunity.requiredSkills || []).map((skill, index) => (
             <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
               {skill}
             </span>
           ))}
         </div>
       </div>
-
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>Posted {opportunity.postedTime}</span>
-        <span>{opportunity.proposalCount} proposals</span>
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          opportunity.clientType === 'Verified Client' 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-blue-100 text-blue-800'
-        }`}>
-          {opportunity.clientType}
+        <span>Posted {opportunity.createdAt ? new Date(opportunity.createdAt).toLocaleDateString() : 'N/A'}</span>
+        <span>{opportunity.applicants ? opportunity.applicants.length : 0} proposals</span>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${opportunity.client?.verified ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+          {opportunity.client?.verified ? 'Verified Client' : 'Client'}
         </span>
       </div>
     </div>
@@ -253,7 +197,21 @@ const FreelancerDashboard = () => {
     );
   };
 
+  if (loading) {
     return (
+      <div className="min-h-screen flex bg-gray-50">
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="flex-1 flex flex-col lg:ml-64 items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -268,18 +226,13 @@ const FreelancerDashboard = () => {
                 <Menu className="w-6 h-6 text-gray-500" />
               </button>
               <div>
-              <h1 className="text-2xl font-bold text-gray-900">Welcome back, harsha!</h1>
-              <p className="text-gray-600">Ready to take on new challenges today?</p>
-            </div>
+                <h1 className="text-2xl font-bold text-gray-900">Welcome back, harsha!</h1>
+                <p className="text-gray-600">Ready to take on new challenges today?</p>
+              </div>
             </div>
             <div className="flex items-center space-x-8">
               <div className="relative">
                 <Bell className="w-6 h-6 text-gray-500" />
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {notifications.length}
-                  </span>
-                )}
               </div>
               <button className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 flex items-center">
                 <Search className="w-4 h-4 mr-2" />
@@ -301,7 +254,7 @@ const FreelancerDashboard = () => {
             />
             <StatCard
               title="Total Earnings"
-              value={`$${dashboardData.totalEarnings.toLocaleString()}`}
+              value={`$${dashboardData.totalEarnings?.toLocaleString() || 0}`}
               icon={DollarSign}
               color="bg-green-600"
             />
@@ -324,7 +277,6 @@ const FreelancerDashboard = () => {
               color="bg-indigo-600"
             />
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Active Projects */}
             <div className="lg:col-span-2">
@@ -339,29 +291,28 @@ const FreelancerDashboard = () => {
               </div>
               <div className="space-y-6">
                 {activeProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
+                  <ProjectCard key={project._id} project={project} />
                 ))}
               </div>
-
-              {/* Recent Opportunities */}
+              {/* Recently Worked Projects */}
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Recent Opportunities</h2>
-                    <p className="text-gray-600">New projects matching your skills</p>
+                    <h2 className="text-xl font-bold text-gray-900">Recently Worked Projects</h2>
+                    <p className="text-gray-600">Projects you recently completed</p>
                   </div>
-                  <button className="text-purple-600 hover:text-purple-800 font-medium">
-                    Browse All Projects
-                  </button>
                 </div>
                 <div className="space-y-6">
-                  {recentOpportunities.map((opportunity) => (
-                    <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-                  ))}
+                  {recentlyWorkedProjects.length === 0 ? (
+                    <div className="text-gray-500 text-center">No recently completed projects.</div>
+                  ) : (
+                    recentlyWorkedProjects.map((project) => (
+                      <ProjectCard key={project._id} project={project} />
+                    ))
+                  )}
                 </div>
               </div>
             </div>
-
             {/* Recent Activity & Quick Actions */}
             <div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -370,9 +321,25 @@ const FreelancerDashboard = () => {
                   <p className="text-gray-600">Latest updates and notifications</p>
                 </div>
                 <div className="space-y-4">
-                  {recentActivity.map((activity) => (
-                    <ActivityItem key={activity.id} activity={activity} />
-                  ))}
+                  {/* recentActivity data is not available in the current fetch, so this will be empty */}
+                  {/* You would typically fetch this from a separate endpoint or pass it as a prop */}
+                  {/* For now, it's a placeholder */}
+                  <ActivityItem key="activity-1" activity={{
+                    id: "act-1",
+                    icon: MessageSquare,
+                    message: "New message from client John Doe on project 'Web App Development'",
+                    time: "10 minutes ago",
+                    amount: 150,
+                    color: "text-blue-600"
+                  }} />
+                  <ActivityItem key="activity-2" activity={{
+                    id: "act-2",
+                    icon: DollarSign,
+                    message: "Payment received for project 'E-commerce Website'",
+                    time: "2 hours ago",
+                    amount: 2500,
+                    color: "text-green-600"
+                  }} />
                 </div>
               </div>
 
@@ -409,6 +376,7 @@ const FreelancerDashboard = () => {
         </main>
       </div>
     </div>
+
   );
 };
 

@@ -21,6 +21,7 @@ export const freelancerProjects = async (req, res) => {
         if (!projects || projects.length === 0) {
             return res.status(404).json({ message: 'No projects found for this freelancer' });
         }
+        console.log("freelancer projects", projects);
         res.status(200).json({ message: 'Freelancer projects retrieved successfully', projects });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
