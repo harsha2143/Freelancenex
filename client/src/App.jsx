@@ -39,9 +39,9 @@ const App = () => {
         </ProtectedRoute>
       } />
       <Route path='/freelancer/dashboard' element={
-        <ProtectedRoute role="freelancer">
+       
           <FreelancerDashboard />
-        </ProtectedRoute>
+       
       } />
 
       <Route path='/freelancer/my-applications' element={<MyApplications />} />
