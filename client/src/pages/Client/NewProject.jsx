@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { motion } from 'framer-motion'
 import { Upload, X, DollarSign, Calendar, FileText, Tag, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import useUserStore from '../../store/userStore';
@@ -14,7 +15,6 @@ export default function NewProject() {
     const fileInputRef = useRef(null);
     const inputRef = useRef(null);
     const user = useUserStore((state) => state.user);
-
     useEffect(() => {
         if (skillInput === "other" && inputRef.current) {
             inputRef.current.focus();
@@ -137,18 +137,18 @@ export default function NewProject() {
                 deadline: projectData.deadline,
                 requiredSkills,
                 customSkills,
-                client: user.id, // Replace with dynamic client ID later
+                client: user?.id, // Replace with dynamic client ID later
                 category: projectData.category.replace(/_/g, " "),
                 experienceLevel: mapExperience(projectData.experienceLevel),
                 files: fileUrls, // Include Cloudinary URLs
             };
 
             const res = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/client/addProject`, {
+                `${import.meta.env.VITE_BACKEND_URL}/client/addProject`, payload, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
-                payload
+
             });
 
             alert("✅ Project posted successfully!");
@@ -180,24 +180,41 @@ export default function NewProject() {
     };
 
     return (
+
         <div className="min-h-screen bg-gray-50 py-8 flex">
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-            <div className="flex-1 flex flex-col sm:px-6 lg:px-8 lg:ml-64">
+            <motion.div className="flex-1 flex flex-col sm:px-6 lg:px-8 lg:ml-64"
+            >
                 <div className="space-y-8">
                     {/* Header */}
-                    <div className="flex items-center flex-wrap sm:flex-nowrap">
+                    <motion.div className="flex items-center flex-wrap sm:flex-nowrap"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 1 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-6">
                             <Menu className="w-6 h-6 text-gray-500" />
                         </button>
-                        <div>
-                            <h1 className="text-3xl font-bold text-black text-gray-900">Post a New Project</h1>
+                        <motion.div
+                            nitial={{ opacity: 0.2, y: 100 }}
+                            animate={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <motion.h1 className="text-3xl font-bold text-black text-gray-900">Post a New Project</motion.h1>
                             <p className="text-gray-600 mt-1">Tell us about your project and find the perfect freelancer</p>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Project Details */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <motion.div className="bg-white rounded-lg shadow-sm border border-gray-200"
+                            initial={{ opacity: 0.1, y: 100 }}
+                            animate={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1.5 }}
+                            viewport={{ once: true }}>
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <FileText className="h-5 w-5 text-blue-600" />
@@ -337,10 +354,16 @@ export default function NewProject() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Budget & Timeline */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <motion.div
+                            className="bg-white rounded-lg shadow-sm border border-gray-200"
+                            initial={{ opacity: 0.2, y: 100 }}
+                            whileInView={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1.5 }}
+                            viewport={{ once: true }}
+                        >
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <DollarSign className="h-5 w-5 text-green-600" />
@@ -378,10 +401,14 @@ export default function NewProject() {
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Requirements */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-black">
+                        <motion.div className="bg-white rounded-lg shadow-sm border border-gray-200 text-black"
+                            initial={{ opacity: 0.2, y: 100 }}
+                            whileInView={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1.5 }}
+                            viewport={{ once: true }}>
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <Calendar className="h-5 w-5 text-purple-600" />
@@ -408,10 +435,14 @@ export default function NewProject() {
                                     </select>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Attachments */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <motion.div className="bg-white rounded-lg shadow-sm border border-gray-200"
+                            initial={{ opacity: 0.2, y: 100 }}
+                            whileInView={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1.5 }}
+                            viewport={{ once: true }}>
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <Upload className="h-5 w-5 text-orange-600" />
@@ -462,7 +493,7 @@ export default function NewProject() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Submit */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -492,7 +523,7 @@ export default function NewProject() {
                         </div>
                     </form>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

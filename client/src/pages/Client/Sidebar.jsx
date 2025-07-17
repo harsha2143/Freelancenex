@@ -21,7 +21,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { id: 'applicants', label: 'Applicants', icon: Send, path: '/client/applicants' },
     { id: 'active-projects', label: 'Projects', icon: Briefcase, path: '/client/projects' },
     // { id: 'earnings', label: 'Earnings', icon: DollarSign, path: '/client/earnings' },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/client/messages' },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/client/chat' },
     { id: 'profile', label: 'Profile', icon: User, path: '/client/profile' },
     // { id: 'settings', label: 'Settings', icon: Settings, path: '/client/settings' },
   ];

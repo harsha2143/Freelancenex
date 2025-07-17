@@ -14,12 +14,13 @@ import {
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import useUserStore from '../../store/userStore';
-
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 // import { useParams } from "react-router-dom";
 
 export default function ClientProjects() {
   // assumes route: /projects/:clientId
-  
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -32,7 +33,7 @@ export default function ClientProjects() {
   const user = useUserStore((state) => state.user);
   console.log(user)
 
-  const clientId =user?.id;
+  const clientId = user?.id;
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -100,12 +101,12 @@ export default function ClientProjects() {
 
   const projectsByStatus = {
     all: filteredProjects,
-    open: filteredProjects.filter((p) => p.status === "open"),
+    open: filteredProjects.filter((p) => p.status === "Open"),
     pending_proposals: filteredProjects.filter(
-      (p) => p.status === "pending_proposals"
+      (p) => p.status === "Pending"
     ),
-    in_progress: filteredProjects.filter((p) => p.status === "in_progress"),
-    completed: filteredProjects.filter((p) => p.status === "completed"),
+    in_progress: filteredProjects.filter((p) => p.status === "Active"),
+    completed: filteredProjects.filter((p) => p.status === "Completed"),
   };
 
   const currentProjects = projectsByStatus[activeTab] || [];
@@ -115,7 +116,11 @@ export default function ClientProjects() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="w-full mx-auto lg:ml-64">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <motion.div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-white rounded-lg shadow-md px-6 py-2 mb-4"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}>
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -130,14 +135,19 @@ export default function ClientProjects() {
               </p>
             </div>
           </div>
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
+          <button onClick={() => navigate('/client/post-projects')} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
             <Plus className="h-4 w-4" />
             Post New Project
+
           </button>
-        </div>
+        </motion.div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <motion.div className="bg-white rounded-lg shadow-sm border p-6"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1.5 }}
+          viewport={{ once: true }}>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -149,7 +159,7 @@ export default function ClientProjects() {
                 className="w-full pl-10 pr-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="relative w-full sm:w-48">
+            <div className="relative w-full sm:w-48 text-black">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <select
                 value={statusFilter}
@@ -164,10 +174,14 @@ export default function ClientProjects() {
               </select>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tabs */}
-        <div className="space-y-6">
+        <motion.div className="space-y-6"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 2 }}
+          viewport={{ once: true }}>
           <div className="grid grid-cols-5 gap-2 bg-gray-100 p-1 rounded-lg mt-5">
             {[
               { key: "all", label: "All" },
@@ -190,7 +204,11 @@ export default function ClientProjects() {
           </div>
 
           {/* Projects */}
-          <div className="space-y-4">
+          <motion.div className="space-y-4"
+            initial={{ opacity: 0.2, y: 100 }}
+            whileInView={{ opacity: 0.8, y: 0 }}
+            transition={{ duration: 2.5 }}
+            viewport={{ once: true }}>
             {loading ? (
               <div className="text-center py-10 text-gray-500">
                 Loading projects...
@@ -322,8 +340,8 @@ export default function ClientProjects() {
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

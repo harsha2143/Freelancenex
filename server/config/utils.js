@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-// import cloudinary from 'cloudinary.js';
+import Cloudinary from './cloudinary.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';

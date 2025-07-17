@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
-
+import { motion } from "framer-motion";
 const Applicants = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,13 +104,13 @@ const Applicants = () => {
         projects.map((project) =>
           project._id === projectId
             ? {
-                ...project,
-                applicants: project.applicants.map((applicant) =>
-                  applicant.freelancerId.toString() === freelancerId
-                    ? { ...applicant, status: "accepted" }
-                    : applicant
-                ),
-              }
+              ...project,
+              applicants: project.applicants.map((applicant) =>
+                applicant.freelancerId.toString() === freelancerId
+                  ? { ...applicant, status: "accepted" }
+                  : applicant
+              ),
+            }
             : project
         )
       );
@@ -156,13 +156,13 @@ const Applicants = () => {
         projects.map((project) =>
           project._id === projectId
             ? {
-                ...project,
-                applicants: project.applicants.map((applicant) =>
-                  applicant.freelancerId.toString() === freelancerId
-                    ? { ...applicant, status: "declined" }
-                    : applicant
-                ),
-              }
+              ...project,
+              applicants: project.applicants.map((applicant) =>
+                applicant.freelancerId.toString() === freelancerId
+                  ? { ...applicant, status: "declined" }
+                  : applicant
+              ),
+            }
             : project
         )
       );
@@ -229,7 +229,11 @@ const Applicants = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="w-full mx-auto lg:ml-64">
-        <div className="bg-gradient-to-r from-blue-50 to-white rounded-lg shadow-md p-4 mb-6">
+        <motion.div className="bg-gradient-to-r from-blue-50 to-white rounded-lg shadow-md p-4 mb-6"
+          initial={{ opacity: 0.1, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}>
           <div className="flex items-center justify-between flex-wrap sm:flex-nowrap">
             <div className="flex items-center">
               <button
@@ -248,9 +252,13 @@ const Applicants = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <motion.div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1.5 }}
+          viewport={{ once: true }}>
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-300">
             <div className="flex items-center">
               <Users className="w-10 h-10 text-blue-600" />
@@ -297,9 +305,13 @@ const Applicants = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
+        <motion.div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 p-6 mb-8"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 2 }}
+          viewport={{ once: true }}>
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 h-6 w-6" />
@@ -335,9 +347,13 @@ const Applicants = () => {
               </select>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="space-y-6">
+        <motion.div className="space-y-6"
+          initial={{ opacity: 0.2, y: 100 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 2 }}
+          viewport={{ once: true }}>
           {isLoading ? (
             <div className="text-center py-12">
               <p className="text-gray-500">Loading projects...</p>
@@ -393,17 +409,16 @@ const Applicants = () => {
                                 >
                                   {applicant.status
                                     ? applicant.status
-                                        .charAt(0)
-                                        .toUpperCase() +
-                                      applicant.status.slice(1)
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                    applicant.status.slice(1)
                                     : "Pending"}
                                 </span>
                               </div>
                               <button
                                 onClick={() =>
                                   handleViewProfile(
-                                    `/freelancer/${
-                                      applicant._id || applicant.freelancerId
+                                    `/freelancer/${applicant._id || applicant.freelancerId
                                     }`
                                   )
                                 }
@@ -430,7 +445,7 @@ const Applicants = () => {
                         </div>
                         <div className="flex flex-col gap-4 mt-2">
                           {applicant.status === "pending" ||
-                          !applicant.status ? (
+                            !applicant.status ? (
                             <>
                               <button
                                 onClick={() =>
@@ -500,7 +515,7 @@ const Applicants = () => {
               </div>
             </>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

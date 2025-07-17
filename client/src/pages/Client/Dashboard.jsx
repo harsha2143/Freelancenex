@@ -25,7 +25,7 @@ import {
 
 import useUserStore from '../../store/userStore';
 import axiosInstance from '../../api/axiosInstance';
-
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 const ClientDashboard = () => {
@@ -43,6 +43,7 @@ const ClientDashboard = () => {
     notifications: []
   });
   const user = useUserStore((state) => state.user);
+  const navigate=useNavigate()
 
   // Mock API calls - replace with actual backend endpoints
   useEffect(() => {
@@ -173,10 +174,12 @@ const ClientDashboard = () => {
     // Handle navigation based on section
     switch (section) {
       case 'active-projects':
+        navigate('/client/projects');
         // Navigate to active projects page
         console.log('Navigate to active projects');
         break;
-      case 'earnings':
+      case 'post-newProject':
+        navigate('/client/post-projects')
         // Navigate to earnings/payment history
         console.log('Navigate to earnings');
         break;
@@ -331,7 +334,7 @@ const ClientDashboard = () => {
                 </button>
               </div>
               <button
-                onClick={handlePostNewProject}
+                onClick={()=>navigate('/client/post-projects')}
                 className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
@@ -345,7 +348,7 @@ const ClientDashboard = () => {
         <div className="p-6">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl rounded-xl shadow-lg p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Briefcase className="w-8 h-8 text-blue-600" />
@@ -357,7 +360,7 @@ const ClientDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <User className="w-8 h-8 text-green-600" />
@@ -369,7 +372,7 @@ const ClientDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <DollarSign className="w-8 h-8 text-purple-600" />
@@ -381,7 +384,7 @@ const ClientDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Clock className="w-8 h-8 text-orange-600" />
@@ -511,7 +514,7 @@ const ClientDashboard = () => {
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <button
-                    onClick={handlePostNewProject}
+                    onClick={() => handleNavigation('post-newProject')}
                     className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <Plus className="w-6 h-6 text-gray-600" />
