@@ -31,7 +31,7 @@ export default function ClientProjects() {
   const [error, setError] = useState(null);
 
   const user = useUserStore((state) => state.user);
-  console.log(user)
+ 
 
   const clientId = user?.id;
 

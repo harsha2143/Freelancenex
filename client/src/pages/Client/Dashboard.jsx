@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import {
   Bell,
@@ -43,7 +44,7 @@ const ClientDashboard = () => {
     notifications: []
   });
   const user = useUserStore((state) => state.user);
-  const navigate=useNavigate()
+  const navigate = useNavigate()
 
   // Mock API calls - replace with actual backend endpoints
   useEffect(() => {
@@ -308,17 +309,6 @@ const ClientDashboard = () => {
                   <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
                   <p className="text-gray-600">Welcome back, {user?.username || "User"}</p>
                 </div>
-                {/* Profile Card */}
-                {/* <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-lg shadow">
-                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {user?.name?.charAt(0) || "U"}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">{user?.name || "User"}</div>
-                    <div className="text-xs text-gray-500">{user?.email}</div>
-                  </div>
-                </div> */}
-                
               </div>
             </div>
 
@@ -334,7 +324,7 @@ const ClientDashboard = () => {
                 </button>
               </div>
               <button
-                onClick={()=>navigate('/client/post-projects')}
+                onClick={() => navigate('/client/post-projects')}
                 className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
@@ -346,6 +336,12 @@ const ClientDashboard = () => {
 
         {/* Dashboard Content */}
         <div className="p-6">
+          <motion.div
+          initial={{ opacity: 0.1, y: 80 }}
+          animate={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}>
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-xl rounded-xl shadow-lg p-6">
@@ -396,8 +392,14 @@ const ClientDashboard = () => {
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          </motion.div>
+          
+          <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0.1, y: 80 }}
+          animate={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1.5 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}>
             {/* Recent Projects */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow">
@@ -502,7 +504,7 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Actions */}
           <div className="mt-8">

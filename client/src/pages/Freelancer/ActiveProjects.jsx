@@ -13,6 +13,7 @@ import {
     Menu
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import useUserStore from '../../store/userStore';
 import axiosInstance from '../../api/axiosInstance';
 const ActiveProjects = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -21,11 +22,12 @@ const ActiveProjects = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const user = useUserStore((state) => state.user);
     // Get freelancer ID from localStorage or context
     const getFreelancerId = () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        return user?.id || user?._id || '68737c718a4b0e09448f541b'; // Fallback for testing
+        // const user = JSON.parse(localStorage.getItem('user'));
+        // return user?.id || user?._id || '68737c718a4b0e09448f541b'; // Fallback for testing
+        return user?.id;
     };
 
     useEffect(() => {

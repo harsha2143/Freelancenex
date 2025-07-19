@@ -14,20 +14,22 @@ import {
 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 
+
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Grid3X3, path: '/client/dashboard' },
     { id: 'browse-projects', label: 'Add Projects', icon: Search, path: '/client/post-projects' },
     { id: 'applicants', label: 'Applicants', icon: Send, path: '/client/applicants' },
     { id: 'active-projects', label: 'Projects', icon: Briefcase, path: '/client/projects' },
     // { id: 'earnings', label: 'Earnings', icon: DollarSign, path: '/client/earnings' },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/client/chat' },
-    { id: 'profile', label: 'Profile', icon: User, path: '/client/profile' },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '/client/messages' },
+    { id: 'profile', label: 'Profile Settings', icon: User, path: '/client/profile' },
     // { id: 'settings', label: 'Settings', icon: Settings, path: '/client/settings' },
   ];
   const clearUser = useUserStore((state) => state.clearUser);
   const user = useUserStore((state) => state.user);
-
+  
 
   const handleLogout = () => {
     clearUser();

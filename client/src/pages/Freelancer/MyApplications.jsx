@@ -1,6 +1,7 @@
-import { useState ,useEffect} from "react"
+import { useState, useEffect } from "react"
 import { Send, Search, Filter, Calendar, DollarSign, Eye, MessageSquare, CheckCircle, X, Menu } from "lucide-react"
 import Sidebar from "./Sidebar"
+import { motion } from 'framer-motion'
 import axiosInstance from "../../api/axiosInstance"
 export default function MyApplications() {
     const [searchTerm, setSearchTerm] = useState("")
@@ -11,7 +12,7 @@ export default function MyApplications() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-   const FreelancerId='68737c718a4b0e09448f541b'
+    const FreelancerId = '68737c718a4b0e09448f541b'
 
     useEffect(() => {
         // Fetch proposals from API or state management
@@ -39,7 +40,7 @@ export default function MyApplications() {
         }
     };
 
-  
+
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -90,7 +91,7 @@ export default function MyApplications() {
     const applicationsArray = Array.isArray(applications) ? applications : [];
     console.log('Applications state:', applications);
     console.log('ApplicationsArray length:', applicationsArray.length);
-    
+
     const filteredapplications = applicationsArray.filter((proposal) => {
         const matchesSearch =
             proposal.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,7 +99,7 @@ export default function MyApplications() {
         const matchesStatus = statusFilter === "all" || proposal.status === statusFilter
         return matchesSearch && matchesStatus
     })
-    
+
     console.log('Filtered applications length:', filteredapplications.length);
     console.log('Active tab:', activeTab);
 
@@ -149,7 +150,7 @@ export default function MyApplications() {
                             </div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading applications</h3>
                             <p className="text-gray-500 mb-4">{error}</p>
-                            <button 
+                            <button
                                 onClick={fetchApplications}
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                             >
@@ -168,22 +169,37 @@ export default function MyApplications() {
             <div className="w-full px-1 sm:px-8 lg:px-12 lg:ml-64">
                 <div className="space-y-8">
                     {/* Header */}
-                    <div className="flex items-center jusify-start sm:gap-6 lg:justify-between flex-wrap sm:flex-nowrap">
+                    <motion.div className="flex items-center jusify-start sm:gap-6 lg:justify-between flex-wrap sm:flex-nowrap"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 1 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
                             <Menu className="w-6 h-6 text-gray-500" />
                         </button>
-                        <div>
+                        <motion.div
+                            initial={{ opacity: 0.1, y: 80 }}
+                            animate={{ opacity: 0.8, y: 0 }}
+                            transition={{ duration: 1 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}>
                             <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
                             <p className="text-gray-600 mt-1">Track all your submitted applications</p>
-                        </div>
-                        <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-3 sm:ml-12 transition-all">
+                        </motion.div>
+                        <motion.button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-3 sm:ml-12 transition-all">
                             <Search className="h-4 w-4" />
                             Browse Projects
-                        </button>
-                    </div>
+                        </motion.button>
+                    </motion.div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 1.5 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -233,10 +249,15 @@ export default function MyApplications() {
                                 <CheckCircle className="h-8 w-8 text-gray-400" />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Filters */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <motion.div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 2 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -263,10 +284,15 @@ export default function MyApplications() {
                                 </select>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Application Tabs */}
-                    <div className="space-y-6">
+                    <motion.div className="space-y-6"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 2 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <div className="bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
                             <div className="grid grid-cols-5 gap-1">
                                 {Object.entries(applicationsByStatus).map(([status, statusApplications]) => (
@@ -412,7 +438,7 @@ export default function MyApplications() {
                                 ))
                             )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>

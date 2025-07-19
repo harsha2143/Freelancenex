@@ -9,11 +9,11 @@ import NewProject from './pages/Client/NewProject';
 import MyApplications from './pages/Freelancer/MyApplications';
 import ActiveProjects from './pages/Freelancer/ActiveProjects';
 import BrowseProjects from './pages/Freelancer/BrowseProjects';
-// import Applicants from './pages/Client/Applicants';
 import Applicants from './pages/Client/Applicants';
 import Chat from './pages/Shared/Chat';
 import ClientProjects from './pages/Client/Projects';
 import Login from './pages/Shared/Login';
+import Messages from './pages/Shared/Messages'
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -52,8 +52,10 @@ const App = () => {
       <Route path='/client/projects' element={<ClientProjects />} />
       {/* <Route path='/client/applicants' element={<Applicants />} /> */}
       <Route path='/client/applicants' element={<Applicants />} />
-      <Route path='/client/chat' element={<Chat />} />
-      <Route path='/freelancer/chat' element={<Chat />} />
+      <Route path='/client/messages' element={<Messages />} />
+      <Route path='/freelancer/messages' element={<Messages/>} />
+      <Route path='/client/chat/' element={<Chat />} />
+
     </Routes>
   )
 }

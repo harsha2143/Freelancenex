@@ -1,12 +1,11 @@
 // index.js
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Search, Filter, DollarSign, Calendar, MapPin, Star, Clock, Users, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import axiosInstance from "../../api/axiosInstance";
+import useUserStore from "../../store/userStore";
 // Mock useAuth hook
-const useAuth = () => ({
-    user: { id: 1, name: "Freelancer" },
-});
 
 // Mock FreelancerLayout component
 const FreelancerLayout = ({ children }) => (
@@ -117,17 +116,18 @@ const Checkbox = ({ id, checked, onCheckedChange }) => (
 );
 
 const BrowseProjects = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [budgetRange, setBudgetRange] = useState([0, 10000]);
     const [experienceLevel, setExperienceLevel] = useState("all");
     const [projectLength, setProjectLength] = useState("all");
-    const [verifiedOnly, setVerifiedOnly] = useState(false);
+    // const [verifiedOnly, setVerifiedOnly] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const user = useUserStore((state) => state.user);
 
     useEffect(() => {
         fetchProjects();
@@ -155,6 +155,36 @@ const BrowseProjects = () => {
             setLoading(false);
         }
     };
+    const handleApplyProject = async (projectId) => {
+        try {
+            console.log(user?.id);
+            console.log(projectId);
+            const response = await axiosInstance.post('/freelancer/projects/apply', { // Or whatever your API endpoint is
+                projectId: projectId,
+                freelancerId: user.id
+                // If you added to schema:
+                // proposalText: proposalText,
+                // bidAmount: bidAmount,
+            });
+
+            // Check for success
+            if (response.status === 200) {
+                console.log(response.data.message); // "Application submitted successfully!"
+                // Update UI, show success message, disable button, etc.
+                alert("Application submitted successfully!");
+                // You might want to refresh project data or update the local state
+            }
+
+        } catch (error) {
+            console.error('Error submitting proposal:', error.response ? error.response.data : error.message);
+            if (error.response && error.response.status === 409) {
+                alert(error.response.data.message); // "You have already applied to this project."
+            } else {
+                alert('Failed to submit application. Please try again.');
+            }
+        }
+    };
+
 
     const categories = [
         { value: "all", label: "All Categories" },
@@ -179,17 +209,17 @@ const BrowseProjects = () => {
         const matchesBudget = projectBudget >= budgetRange[0] && projectBudget <= budgetRange[1];
 
         const matchesExperience = experienceLevel === "all" || project.experienceLevel === experienceLevel;
-        
+
         // For project length, we'll use a simple heuristic based on deadline
         const now = new Date();
         const deadline = new Date(project.deadline);
         const daysUntilDeadline = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-        
+
         let projectLengthCategory = "more_than_6_months";
         if (daysUntilDeadline <= 30) projectLengthCategory = "less_than_1_month";
         else if (daysUntilDeadline <= 90) projectLengthCategory = "1_to_3_months";
         else if (daysUntilDeadline <= 180) projectLengthCategory = "3_to_6_months";
-        
+
         const matchesLength = projectLength === "all" || projectLengthCategory === projectLength;
 
         return matchesSearch && matchesCategory && matchesBudget && matchesExperience && matchesLength;
@@ -221,7 +251,7 @@ const BrowseProjects = () => {
         const now = new Date();
         const diffTime = Math.abs(now - date);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 1) return "1 day ago";
         if (diffDays < 7) return `${diffDays} days ago`;
         if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
@@ -262,7 +292,7 @@ const BrowseProjects = () => {
     return (
         <FreelancerLayout>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:ml-64">
-                
+
                 <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
                 <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-6">
                     <Menu className="w-6 h-6 text-gray-500" />
@@ -271,15 +301,25 @@ const BrowseProjects = () => {
                 {/* Projects List */}
                 <div className="lg:col-span-3 space-y-6">
                     {/* Header */}
-                    <div className="flex items-center justify-between">
+                    <motion.div className="flex items-center justify-between"
+                        initial={{ opacity: 0.1, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 1 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         <div>
                             <h1 className="text-3xl font-bold text-black">Browse Projects</h1>
                             <p className="text-gray-600 mt-1">{filteredProjects.length} projects found</p>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Projects */}
-                    <div className="space-y-4">
+                    <motion.div className="space-y-4"
+                        initial={{ opacity: 0.2, y: 80 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ duration: 1.5 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}>
                         {filteredProjects.length === 0 ? (
                             <Card>
                                 <CardContent className="pt-6">
@@ -348,17 +388,22 @@ const BrowseProjects = () => {
                                         {/* Actions */}
                                         <div className="flex items-center justify-between">
                                             <Button variant="outline">View Details</Button>
-                                            <Button>Submit Proposal</Button>
+                                            <Button onClick={() => handleApplyProject(project._id)}>Submit Proposal</Button>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))
                         )}
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Filters Sidebar */}
-                <div className="lg:col-span-1">
+                <motion.div className="lg:col-span-1"
+                    initial={{ opacity: 0.1, y: 80 }}
+                    animate={{ opacity: 0.8, y: 0 }}
+                    transition={{ duration: 1 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}>
                     <Card className="sticky top-6">
                         <CardHeader>
                             <CardTitle className="flex text-black items-center gap-2">
@@ -451,7 +496,7 @@ const BrowseProjects = () => {
                             </div>
                         </CardContent>
                     </Card>
-                </div>
+                </motion.div>
             </div>
         </FreelancerLayout>
     );

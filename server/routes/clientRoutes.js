@@ -11,6 +11,7 @@ import {
   profileData,
   profileUpdate,
   getClientDashboard,
+  
 } from "../controllers/clientController.js";
 // Make sure the file exists at this path, or update the path if needed
 const router = express.Router();

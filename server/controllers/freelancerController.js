@@ -34,24 +34,24 @@ export const getApplications = async (req, res) => {
         // console.log('Fetching applications for freelancer ID:', freelancerId);
         // console.log('Request params:', req.params);
         // console.log('Request headers:', req.headers);
-        
+
         // Validate freelancerId
         if (!freelancerId) {
             console.log('Missing freelancer ID');
             return res.status(400).json({ message: 'Missing freelancer ID' });
         }
-        
+
         if (!mongoose.Types.ObjectId.isValid(freelancerId)) {
             console.log('Invalid ObjectId format:', freelancerId);
             return res.status(400).json({ message: 'Invalid ObjectId format' });
         }
-        
+
         // console.log('About to query database...');
-        
+
         // First, let's test if we can find any projects at all
         const allProjects = await Project.find({});
         // console.log('Total projects in database:', allProjects.length);
-        
+
         // Find projects where the freelancer has applied but is not assigned as the current Freelancer
         const projects = await Project.find({
             applicants: { $in: [new mongoose.Types.ObjectId(freelancerId)] },
@@ -62,16 +62,16 @@ export const getApplications = async (req, res) => {
                 { Freelancer: { $ne: freelancerId } }
             ]
         }).populate('client', 'name email company location');
-        
+
         // console.log('Database query completed');
-        
+
         // console.log('Found projects:', projects.length);
-        
+
         // Return empty array if no projects found (instead of 404)
         if (!projects || projects.length === 0) {
-            return res.status(200).json({ 
-                message: 'No applied projects found for this freelancer', 
-                applications: [] 
+            return res.status(200).json({
+                message: 'No applied projects found for this freelancer',
+                applications: []
             });
         }
 
@@ -128,21 +128,21 @@ export const getActiveProjects = async (req, res) => {
             Freelancer: freelancerId,
             status: { $in: ['Active', 'Pending'] } // Only active and pending projects
         }).populate('client', 'name email company location')
-          .populate('Freelancer', 'name email skills')
-          .sort({ createdAt: -1 });
+            .populate('Freelancer', 'name email skills')
+            .sort({ createdAt: -1 });
 
         // console.log('Found projects:', projects.length);
 
         if (!projects || projects.length === 0) {
-            return res.status(200).json({ 
-                message: 'No active projects found for this freelancer', 
-                projects: [] 
+            return res.status(200).json({
+                message: 'No active projects found for this freelancer',
+                projects: []
             });
         }
 
-        res.status(200).json({ 
-            message: 'Active projects retrieved successfully', 
-            projects 
+        res.status(200).json({
+            message: 'Active projects retrieved successfully',
+            projects
         });
     } catch (error) {
         console.error('Error in getActiveProjects:', error);
@@ -153,8 +153,8 @@ export const getActiveProjects = async (req, res) => {
 
 export const profileData = async (req, res) => {
     try {
-        const freelancerId = req.params.id; 
-        const freelancer = await Freelancer.findById(freelancerId).select('-password -__v'); 
+        const freelancerId = req.params.id;
+        const freelancer = await Freelancer.findById(freelancerId).select('-password -__v');
 
         if (!freelancer) {
             return res.status(404).json({ message: 'Freelancer profile not found' });
@@ -180,6 +180,43 @@ export const profileUpdate = async (req, res) => {
 
         res.status(200).json({ message: 'Freelancer profile updated successfully', freelancer: updatedFreelancer });
     } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
+
+
+export const applyProject = async (req, res) => {
+    try {
+        const { freelancerId, projectId } = req.body;
+        if (!freelancerId || !projectId) {
+            return res.status(400).json({ message: 'Missing projectId or freelancerId.' });
+        }
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(400).json({ message: 'Project not found.' });
+        }
+        const freelancer = await Freelancer.findById(freelancerId);
+        if (!freelancer) {
+            return res.status(404).json({ message: 'Freelancer not found.' });
+        }
+        // Defensive: ensure applicant.freelancerId exists before calling .toString()
+        const hasApplied = project.applicants.some((applicant) => applicant.freelancerId && applicant.freelancerId.toString() === freelancerId);
+        if (hasApplied) {
+            return res.status(409).json({ message: 'You have already applied to this project.' });
+        }
+
+        //Adding applicant
+        project.applicants.push({freelancerId: freelancerId, status: 'pending'});
+
+        await project.save();
+        const appliedApplicant = project.applicants.find(app => app.freelancerId && app.freelancerId.toString() === freelancerId);
+        res.status(200).json({
+            message: 'Application submitted successfully!',
+            project: appliedApplicant,
+        });
+
+    } catch (error) {
+        console.error('Error applying to project:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 }

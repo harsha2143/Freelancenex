@@ -1,206 +1,705 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import useUserStore from '../../store/userStore';
+import { useState } from "react";
+import {
+  User,
+  Bell,
+  Shield,
+  CreditCard,
+  Upload,
+  Save,
+  Trash2
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Sidebar from "../client/Sidebar";
+export default function ClientSettings() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
 
-const ClientForm = () => {
-  const user = useUserStore((state) => state.user);
-  const [clients, setClients] = useState([]);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    password: '',
-    username: '',
-    email: '',
-    company: '',
-    mobile: '',
-    location: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  // Fetch clients from database
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get('/api/clients');
-        setClients(response.data);
-      } catch (err) {
-        setError('Failed to fetch clients', err);
-      }
-    };
-    fetchClients();
-  }, []);
-
-  // Handle form input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      const response = await axios.post('/api/clients', formData);
-      setClients([...clients, response.data]);
-      setFormData({
-        name: '',
-        password: '',
-        username: '',
-        email: '',
-        company: '',
-        mobile: '',
-        location: '',
-      });
-    } catch (err) {
-      setError('Failed to create client: ' + err.response?.data?.message || err.message);
-    } finally {
-      setIsSubmitting(false);
+  // Mock user data - replace with actual auth context
+  const user = {
+    firstName: "John",
+    lastName: "Doe",
+    primaryEmailAddress: { emailAddress: "john@example.com" },
+    imageUrl: "",
+    publicMetadata: {
+      companyName: "Acme Corp",
+      industry: "technology",
+      location: "San Francisco, CA",
+      description: "A leading technology company",
+      website: "https://acme.com",
+      phone: "+1 (555) 123-4567"
     }
   };
 
-  if (!user) return <div>Loading...</div>;
+  const [profileData, setProfileData] = useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.primaryEmailAddress?.emailAddress || "",
+    companyName: user?.publicMetadata?.companyName || "",
+    industry: user?.publicMetadata?.industry || "",
+    location: user?.publicMetadata?.location || "",
+    description: user?.publicMetadata?.description || "",
+    website: user?.publicMetadata?.website || "",
+    phone: user?.publicMetadata?.phone || "",
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    pushNotifications: true,
+    projectUpdates: true,
+    proposalAlerts: true,
+    paymentReminders: true,
+    marketingEmails: false,
+  });
+
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisibility: "public",
+    showEmail: false,
+    showPhone: false,
+    allowDirectContact: true,
+  });
+
+  const showToast = (title, description, variant = "default") => {
+    // Mock toast function - replace with actual toast implementation
+    console.log(`Toast: ${title} - ${description}`);
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Mock API call - replace with actual updateUser function
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      showToast(
+        "Profile updated successfully",
+        "Your profile information has been saved."
+      );
+    } catch (error) {
+      showToast(
+        "Error",
+        "Failed to update profile. Please try again.",
+        "destructive"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNotificationUpdate = async () => {
+    setIsLoading(true);
+
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      showToast(
+        "Notification settings updated",
+        "Your notification preferences have been saved."
+      );
+    } catch (error) {
+      showToast(
+        "Error",
+        "Failed to update notification settings.",
+        "destructive"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const TabButton = ({ id, children, icon: Icon }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === id
+        ? "bg-blue-600 text-white"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+        }`}
+    >
+      <Icon className="h-4 w-4" />
+      {children}
+    </button>
+  );
+
+  const Switch = ({ checked, onCheckedChange, id }) => (
+    <button
+      id={id}
+      onClick={() => onCheckedChange(!checked)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-blue-600" : "bg-gray-200"
+        }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? "translate-x-6" : "translate-x-1"
+          }`}
+      />
+    </button>
+  );
+
+  const Select = ({ value, onValueChange, children, placeholder }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {value || placeholder}
+        </button>
+        {isOpen && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const SelectItem = ({ value, onSelect, children }) => (
+    <button
+      onClick={() => {
+        onSelect(value);
+        setIsOpen(false);
+      }}
+      className="w-full px-3 py-2 text-left hover:bg-gray-100"
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="min-h-screen items-center justify-center p-8 bg-gradient-to-b from-teal-50 to-orange-50">
-      <div className="max-w-4xl mx-auto px-1 py-16">
-        <h1 className="text-4xl font-bold mb-8 text-gray-800">Profile</h1>
+    <div className="min-h-screen bg-gray-50 p-6 ml-10">
+      <Sidebar />
+      <div className="max-w-5xl mx-auto space-y-8 lg:ml-64">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
+          <p className="text-gray-600 mt-1">Manage your account preferences and settings</p>
+        </div>
 
-        {/* Form */}
-        <div className="bg-white shadow-xl rounded-lg p-6 mb-8 bg-gradient-to-b from-teal-50 to-orange-50 ">
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 ">
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="name" className="absolute -top-2 left-3 bg-teal-50 text-violet-800 text-sm font-semibold px-1">Name *</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="username" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">Username *</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                minLength={3}
-                maxLength={20}
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="email" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">Email *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="password" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder='Enter a Password'
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-              {/* Toggle password visibility */}
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-purple-600 focus:outline-none"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                tabIndex={-1}
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-3.5-9-7s4-7 9-7a9.956 9.956 0 015.707 1.806m1.688 1.688A9.959 9.959 0 0121 12c0 3.5-4 7-9 7-4.478 0-8.268-2.943-9.542-7z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="company" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">Company</label>
-              <input
-                type="text"
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder='Enter your company'
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="mobile" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">Mobile</label>
-              <input
-                type="tel"
-                id="mobile"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
-                 placeholder='Enter Mobile Number'
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
-            <div className="relative border border-gray-300 rounded-lg px-3 pt-4 pb-2 bg-gray-100 mb-3">
-              <label htmlFor="location" className="absolute -top-2 left-3 bg-white text-purple-700 text-sm font-semibold px-1">Location</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                 placeholder='Enter Location'
-                className="w-full border-none outline-none bg-transparent text-gray-700 placeholder-gray-400 text-md pr-10"
-              />
-            </div>
+        {/* Tabs */}
+        <motion.div className="space-y-6 text-black"
+          initial={{ opacity: 0.1, y: 80 }}
+          animate={{ opacity: 0.8, y: 0 }}
+          transition={{ duration: 1 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}>
+          <div className="flex flex-wrap gap-2">
+            <TabButton id="profile" icon={User}>Profile</TabButton>
+            <TabButton id="notifications" icon={Bell}>Notifications</TabButton>
+            <TabButton id="privacy" icon={Shield}>Privacy</TabButton>
+            <TabButton id="billing" icon={CreditCard}>Billing</TabButton>
+            <TabButton id="security" icon={Shield}>Security</TabButton>
           </div>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-indigo-300"
-          >
-            {isSubmitting ? 'Submitting...' : 'Save '}
-          </button>
-        </div>
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
-          <h2 className="text-2xl font-bold mb-4">Client Profile</h2>
-          <div className="mb-2"><strong>Name:</strong> {user.name}</div>
-          <div className="mb-2"><strong>Username:</strong> {user.username}</div>
-          <div className="mb-2"><strong>Email:</strong> {user.email}</div>
-          <div className="mb-2"><strong>Role:</strong> {user.role}</div>
-        </div>
+
+          {/* Profile Tab */}
+          {activeTab === "profile" && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-6">
+                <div className="flex items-start gap-6 flex-col sm:flex-row">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
+                      <User className="h-5 w-5" />
+                      Personal Information
+                    </h2>
+                    <p className="text-gray-600 ml-7">Update your personal details and profile information</p>
+                  </div>
+
+                  <div className="flex-1 flex items-center gap-8 mt-5 sm:mt-0">
+                    <div>
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 ml-20 mt-3"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Change Photo
+                      </button>
+                      <p className="text-sm text-gray-500 mt-1 ml-24">JPG, PNG up to 5MB</p>
+                    </div>
+                    <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                      {user?.imageUrl ? (
+                        <img src={user.imageUrl} alt="Profile" class="h-20 w-20 rounded-full" />
+                      ) : (
+                        <span className="text-lg font-semibold text-gray-600">
+                          {user?.firstName?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="space-y-6">
+                {/* Profile Picture */}
+                {/* <div className="flex items-center gap-6">
+                  <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                    {user?.imageUrl ? (
+                      <img src={user.imageUrl} alt="Profile" className="h-20 w-20 rounded-full" />
+                    ) : (
+                      <span className="text-lg font-semibold text-gray-600">
+                        {user?.firstName?.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Change Photo
+                    </button>
+                    <p className="text-sm text-gray-500 mt-1">JPG, PNG up to 5MB</p>
+                  </div>
+                </div> */}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                      First Name
+                    </label>
+                    <input
+                      id="firstName"
+                      type="text"
+                      value={profileData.firstName}
+                      onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                      Last Name
+                    </label>
+                    <input
+                      id="lastName"
+                      type="text"
+                      value={profileData.lastName}
+                      onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                      Phone Number
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                      placeholder="+1 (555) 123-4567"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
+                    Company Name
+                  </label>
+                  <input
+                    id="companyName"
+                    type="text"
+                    value={profileData.companyName}
+                    onChange={(e) => setProfileData({ ...profileData, companyName: e.target.value })}
+                    placeholder="Your company name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
+                      Industry
+                    </label>
+                    <select
+                      id="industry"
+                      value={profileData.industry}
+                      onChange={(e) => setProfileData({ ...profileData, industry: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select industry</option>
+                      <option value="technology">Technology</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="finance">Finance</option>
+                      <option value="education">Education</option>
+                      <option value="retail">Retail</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                      Location
+                    </label>
+                    <input
+                      id="location"
+                      type="text"
+                      value={profileData.location}
+                      onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                      placeholder="City, Country"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                    Website
+                  </label>
+                  <input
+                    id="website"
+                    type="url"
+                    value={profileData.website}
+                    onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
+                    placeholder="https://yourcompany.com"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Company Description
+                  </label>
+                  <textarea
+                    id="description"
+                    value={profileData.description}
+                    onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                    placeholder="Brief description of your company..."
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleProfileUpdate}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Notifications Tab */}
+          {activeTab === "notifications" && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </h2>
+                <p className="text-gray-600">Choose how you want to be notified about activity</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  {[
+                    {
+                      key: "emailNotifications",
+                      label: "Email Notifications",
+                      description: "Receive notifications via email"
+                    },
+                    {
+                      key: "pushNotifications",
+                      label: "Push Notifications",
+                      description: "Receive push notifications in your browser"
+                    },
+                    {
+                      key: "projectUpdates",
+                      label: "Project Updates",
+                      description: "Get notified about project milestones and updates"
+                    },
+                    {
+                      key: "proposalAlerts",
+                      label: "Proposal Alerts",
+                      description: "Get notified when freelancers submit proposals"
+                    },
+                    {
+                      key: "paymentReminders",
+                      label: "Payment Reminders",
+                      description: "Reminders about pending payments and invoices"
+                    },
+                    {
+                      key: "marketingEmails",
+                      label: "Marketing Emails",
+                      description: "Receive updates about new features and tips"
+                    }
+                  ].map((setting) => (
+                    <div key={setting.key} className="flex items-center justify-between">
+                      <div>
+                        <label htmlFor={setting.key} className="block text-sm font-medium text-gray-700">
+                          {setting.label}
+                        </label>
+                        <p className="text-sm text-gray-500">{setting.description}</p>
+                      </div>
+                      <Switch
+                        id={setting.key}
+                        checked={notificationSettings[setting.key]}
+                        onCheckedChange={(checked) =>
+                          setNotificationSettings({ ...notificationSettings, [setting.key]: checked })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNotificationUpdate}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Save Notification Settings
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Privacy Tab */}
+          {activeTab === "privacy" && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Privacy Settings
+                </h2>
+                <p className="text-gray-600">Control your privacy and data sharing preferences</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="profileVisibility" className="block text-sm font-medium text-gray-700">
+                      Profile Visibility
+                    </label>
+                    <select
+                      id="profileVisibility"
+                      value={privacySettings.profileVisibility}
+                      onChange={(e) => setPrivacySettings({ ...privacySettings, profileVisibility: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="public">Public - Visible to all freelancers</option>
+                      <option value="limited">Limited - Only visible to hired freelancers</option>
+                      <option value="private">Private - Not visible to anyone</option>
+                    </select>
+                  </div>
+
+                  {[
+                    {
+                      key: "showEmail",
+                      label: "Show Email Address",
+                      description: "Display your email on your public profile"
+                    },
+                    {
+                      key: "showPhone",
+                      label: "Show Phone Number",
+                      description: "Display your phone number on your public profile"
+                    },
+                    {
+                      key: "allowDirectContact",
+                      label: "Allow Direct Contact",
+                      description: "Let freelancers contact you directly"
+                    }
+                  ].map((setting) => (
+                    <div key={setting.key} className="flex items-center justify-between">
+                      <div>
+                        <label htmlFor={setting.key} className="block text-sm font-medium text-gray-700">
+                          {setting.label}
+                        </label>
+                        <p className="text-sm text-gray-500">{setting.description}</p>
+                      </div>
+                      <Switch
+                        id={setting.key}
+                        checked={privacySettings[setting.key]}
+                        onCheckedChange={(checked) => setPrivacySettings({ ...privacySettings, [setting.key]: checked })}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                  Save Privacy Settings
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Billing Tab */}
+          {activeTab === "billing" && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Billing Information
+                </h2>
+                <p className="text-gray-600">Manage your payment methods and billing details</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-8 w-8 text-blue-600" />
+                        <div>
+                          <p className="font-medium">•••• •••• •••• 4242</p>
+                          <p className="text-sm text-gray-600">Expires 12/25</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                          Edit
+                        </button>
+                        <button className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                    <CreditCard className="h-4 w-4" />
+                    Add New Payment Method
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-medium">Billing Address</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Street Address"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="City"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="State/Province"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="ZIP/Postal Code"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                  <Save className="h-4 w-4" />
+                  Save Billing Information
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Security Tab */}
+          {activeTab === "security" && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Security Settings
+                </h2>
+                <p className="text-gray-600">Manage your account security and authentication</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+                      Current Password
+                    </label>
+                    <input
+                      id="currentPassword"
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                      New Password
+                    </label>
+                    <input
+                      id="newPassword"
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                      Confirm New Password
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Update Password
+                  </button>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="font-medium mb-4">Two-Factor Authentication</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add an extra layer of security to your account by enabling two-factor authentication.
+                  </p>
+                  <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                    Enable 2FA
+                  </button>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="font-medium mb-4 text-red-600">Danger Zone</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Once you delete your account, there is no going back. Please be certain.
+                  </p>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    <Trash2 className="h-4 w-4" />
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
-};
-
-export default ClientForm;
+}

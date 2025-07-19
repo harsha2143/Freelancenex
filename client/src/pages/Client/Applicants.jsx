@@ -26,7 +26,7 @@ const Applicants = () => {
 
   // State to manage clientId, initialized from localStorage or set manually below
   const [clientId, setClientId] = useState(
-    localStorage.getItem("clientId") || "64e92fa3a12d8c3f3c88d9b2"
+    localStorage.getItem("clientId") || "68778b35162f639b7094da83"
   );
   // TODO: Replace the following line with your temporary clientId for testing
   // setClientId('68738184c60db42071ca5a30'); // Uncomment this line and comment the next one to use the temporary clientId
