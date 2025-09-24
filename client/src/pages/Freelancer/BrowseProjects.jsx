@@ -173,6 +173,7 @@ const BrowseProjects = () => {
                 // Update UI, show success message, disable button, etc.
                 alert("Application submitted successfully!");
                 // You might want to refresh project data or update the local state
+                //Error
             }
 
         } catch (error) {
